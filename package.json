@@ -14,11 +14,16 @@
   },
   "dependencies": {
     "@types/electron": "^1.4.38",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "electron": "^33.3.1",
     "electron-builder": "^25.1.8",
+    "lucide-react": "^0.471.0",
     "next": "15.1.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
