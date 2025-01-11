@@ -1,12 +1,13 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import * as path from "path";
 
-let mainWindow;
+let mainWindow: BrowserWindow | null;
 
 app.on("ready", () => {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    frame: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
@@ -22,4 +23,22 @@ app.on("ready", () => {
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
+});
+
+ipcMain.handle("window-close", () => {
+  app.quit();
+});
+
+ipcMain.handle("window-maximize", () => {
+  if (mainWindow == null) return;
+  if (mainWindow.isMaximized()) {
+    mainWindow.unmaximize();
+  } else {
+    mainWindow.maximize();
+  }
+});
+
+ipcMain.handle("window-minimize", () => {
+  if (mainWindow == null) return;
+  mainWindow.minimize();
 });
