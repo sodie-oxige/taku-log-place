@@ -1,8 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 import { Cog, Shrink, Maximize, X } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export const metadata = {
   title: "LogManager",
@@ -19,11 +26,39 @@ const winMinimize = () => {
 };
 
 const Header = () => {
+  const [logdir, setLogdir] = useState<string[]>([]);
+  useEffect(() => {
+    (async () => {
+      const logdir = await window.electron.logdirGet();
+      if (logdir && logdir.length > 0) setLogdir(logdir);
+    })();
+  }, []);
+
+  const addLogdir = async () => {
+    const logdir = await window.electron.logdirAdd();
+    if (logdir && logdir.length <= 0) setLogdir(logdir);
+  };
+
   return (
     <header className="fixed t-0 l-0 z-50 flex justify-center items-center w-screen px-2 h-12 bg-background shadow-md">
-      <Button variant="outline">
-        <Cog />
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline">
+            <Cog />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="m-2">
+          <DropdownMenuLabel className="text-lg font-bold">
+            ログ監視フォルダ
+          </DropdownMenuLabel>
+          {logdir.map((l) => (
+            <DropdownMenuLabel key={l}>{l}</DropdownMenuLabel>
+          ))}
+          <DropdownMenuLabel className="text-lg font-bold">
+            <Button onClick={addLogdir}>追加</Button>
+          </DropdownMenuLabel>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <div className="flex-1">
         <Button
           variant="ghost"
