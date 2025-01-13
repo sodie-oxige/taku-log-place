@@ -2,6 +2,8 @@ import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import path from "path";
 import JsonManage from "./module/json_manager";
 import fs from "fs";
+import { Parser } from "htmlparser2";
+import { table } from "console";
 
 let defaultSetting: Tsetting = {
   logdir: [],
@@ -52,13 +54,13 @@ ipcMain.handle("window-minimize", () => {
   mainWindow.minimize();
 });
 
-ipcMain.handle("logdir:add", async () => {
-  const result = (await dialog.showOpenDialog({
+ipcMain.handle("logdir:add", () => {
+  const result = dialog.showOpenDialog({
     properties: ["openDirectory"],
     // title: "ファイルを選択する",
-  })) as unknown as Electron.OpenDialogReturnValue;
+  }) as unknown as Electron.OpenDialogReturnValue;
 
-  let setting: Tsetting = await JsonManage.get("setting");
+  let setting: Tsetting = JsonManage.get("setting");
   if (!result.canceled) {
     setting.logdir.push(result.filePaths[0]);
     JsonManage.update<Tsetting>("setting", setting);
@@ -66,13 +68,13 @@ ipcMain.handle("logdir:add", async () => {
   return setting.logdir;
 });
 
-ipcMain.handle("logdir:get", async () => {
-  const setting: Tsetting = await JsonManage.get("setting");
+ipcMain.handle("logdir:get", () => {
+  const setting: Tsetting = JsonManage.get("setting");
   return setting.logdir;
 });
 
-ipcMain.handle("logfile:get", async () => {
-  const setting: Tsetting = await JsonManage.get("setting");
+ipcMain.handle("logfile:get", () => {
+  const setting: Tsetting = JsonManage.get("setting");
   const logfiles: string[] = setting.logdir
     .map((d) => readDirSyncSub(d))
     .flat()
@@ -89,9 +91,61 @@ ipcMain.handle("logfile:get", async () => {
   return res;
 });
 
-ipcMain.handle("logdata:get", async (_event, id: string) => {
+ipcMain.handle("logdata:get", (_event, id: string) => {
   const res: Tlogdata[] = [];
+  const defaultLogdata: Tlogdata = {
+    name: "",
+    tab: "",
+    content: "",
+    color: "",
+  };
+  let currentLogdata: Tlogdata = {...defaultLogdata};
+  let isSpan = false;
+  let spanIndex = 0;
+
+  const parser = new Parser({
+    onopentag(name, attr) {
+      if (name === "p") {
+        currentLogdata = {...defaultLogdata};
+        const color = attr.style.match(/#[0-9a-f]{6}/);
+        if (color !== null) currentLogdata.color += color[0];
+      } else if (name === "span") {
+        isSpan = true;
+        spanIndex++;
+      }
+    },
+    ontext(text) {
+      if (!isSpan) return;
+      switch (spanIndex) {
+        case 1:
+          currentLogdata.tab += text.replace(/[\[\]]/g, "");
+          break;
+        case 2:
+          currentLogdata.name += text;
+          break;
+        case 3:
+          currentLogdata.content += text;
+          break;
+      }
+    },
+    onclosetag(name) {
+      if (name === "p") {
+        currentLogdata.name = currentLogdata.name.trim();
+        currentLogdata.tab = currentLogdata.tab.trim();
+        currentLogdata.content = currentLogdata.content.trim();
+        res.push(currentLogdata);
+        spanIndex = 0;
+      }
+      isSpan = false;
+    },
+  });
+
   const filepath = decodeURIComponent(id);
+  const html = fs.readFileSync(filepath, "utf-8");
+  parser.write(html);
+  parser.end();
+
+  return res;
 });
 
 const readDirSyncSub = (dir: string): string[] => {

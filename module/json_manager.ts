@@ -7,9 +7,6 @@ class JsonManage {
   > = {};
 
   public static init<T>(name: string, path: string, defaultData: T) {
-    console.log(path)
-    console.log(fs.existsSync(path))
-    console.log(defaultData)
     if (!fs.existsSync(path)) {
       fs.writeFileSync(path, JSON.stringify(defaultData, null, 2));
     }
@@ -29,7 +26,7 @@ class JsonManage {
     JsonManage.setting = {};
   }
 
-  public static async get<T>(name: string): Promise<T> {
+  public static get<T>(name: string): T {
     if (name in JsonManage.setting) {
       return JsonManage.setting[name].data as T;
     } else {
