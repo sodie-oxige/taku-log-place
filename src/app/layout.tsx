@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "log manager app",
+  title: "卓ログ置き場",
 };
 
 export default function RootLayout({

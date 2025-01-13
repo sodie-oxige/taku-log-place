@@ -3,7 +3,6 @@ import path from "path";
 import JsonManage from "./module/json_manager";
 import fs from "fs";
 import { Parser } from "htmlparser2";
-import { table } from "console";
 
 let defaultSetting: Tsetting = {
   logdir: [],

@@ -11,10 +11,6 @@ import { Cog, Shrink, Maximize, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export const metadata = {
-  title: "LogManager",
-};
-
 const winClose = () => {
   window.electron.windowClose();
 };
@@ -66,7 +62,7 @@ const Header = () => {
           asChild
         >
           <Link href="/">
-            <h1 className="text-lg font-bold">Log manager</h1>
+            <h1 className="text-lg font-bold">卓ログ置き場</h1>
           </Link>
         </Button>
       </div>
