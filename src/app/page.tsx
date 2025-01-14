@@ -91,7 +91,8 @@ const IndexPage = () => {
               key={row.id}
               data-state={row.getIsSelected() && "selected"}
               onClick={() => {
-                const path = "/detail/" + encodeURIComponent(row.original.path);
+                const path =
+                  "/detail?id=" + encodeURIComponent(row.original.path);
                 jump(path);
               }}
             >

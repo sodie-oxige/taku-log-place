@@ -1,26 +1,27 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import { useParams } from "next/navigation";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-const DetailPage = () => {
+const DetailPageComponent = () => {
   const [logdata, setLogdata] = useState([] as Tlogdata[]);
-  const params = useParams();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+
   useEffect(() => {
     (async () => {
-      const id = params.id;
       const res = await window.electron.logdataGet(id);
       console.log(res);
       setLogdata(res);
     })();
-  }, []);
+  }, [searchParams]);
+
   return (
     <div>
       {logdata.map((l, i) => (
-        <>
+        <Fragment key={i}>
           <div
-            key={i}
             className="flex flex-col gap-1 p-2"
             style={
               {
@@ -41,9 +42,17 @@ const DetailPage = () => {
             </p>
           </div>
           <Separator />
-        </>
+        </Fragment>
       ))}
     </div>
+  );
+};
+
+const DetailPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DetailPageComponent />
+    </Suspense>
   );
 };
 

@@ -28,7 +28,7 @@ const Header = () => {
       const logdir = await window.electron.logdirGet();
       if (logdir && logdir.length > 0) setLogdir(logdir);
     })();
-  }, []);
+  }, [logdir]);
 
   const addLogdir = async () => {
     const logdir = await window.electron.logdirAdd();

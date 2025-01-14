@@ -53,10 +53,10 @@ ipcMain.handle("window-minimize", () => {
   mainWindow.minimize();
 });
 
-ipcMain.handle("logdir:add", () => {
-  const result = dialog.showOpenDialog({
+ipcMain.handle("logdir:add", async () => {
+  const result = await dialog.showOpenDialog({
     properties: ["openDirectory"],
-    // title: "ファイルを選択する",
+    title: "ファイルを選択する",
   }) as unknown as Electron.OpenDialogReturnValue;
 
   let setting: Tsetting = JsonManage.get("setting");
@@ -98,14 +98,14 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
     content: "",
     color: "",
   };
-  let currentLogdata: Tlogdata = {...defaultLogdata};
+  let currentLogdata: Tlogdata = { ...defaultLogdata };
   let isSpan = false;
   let spanIndex = 0;
 
   const parser = new Parser({
     onopentag(name, attr) {
       if (name === "p") {
-        currentLogdata = {...defaultLogdata};
+        currentLogdata = { ...defaultLogdata };
         const color = attr.style.match(/#[0-9a-f]{6}/);
         if (color !== null) currentLogdata.color += color[0];
       } else if (name === "span") {
