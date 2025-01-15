@@ -61,7 +61,6 @@ const IndexPage = () => {
 
   const router = useRouter();
   const jump = (path: string) => {
-    console.log(path);
     router.push(path);
   };
   return (
@@ -91,8 +90,7 @@ const IndexPage = () => {
               key={row.id}
               data-state={row.getIsSelected() && "selected"}
               onClick={() => {
-                const path =
-                  "/detail?id=" + encodeURIComponent(row.original.path);
+                const path = "./detail?id=" + encodeURIComponent(row.original.path);
                 jump(path);
               }}
             >

@@ -61,7 +61,7 @@ const Header = () => {
           className="absolute top-[50%] left-[50%] [translate:-50%_-50%]"
           asChild
         >
-          <Link href="/">
+          <Link href="./">
             <h1 className="text-lg font-bold">卓ログ置き場</h1>
           </Link>
         </Button>

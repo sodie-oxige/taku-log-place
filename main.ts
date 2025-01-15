@@ -21,7 +21,11 @@ app.on("ready", () => {
     },
   });
 
-  mainWindow.loadURL("http://localhost:3000");
+  if (process.env.NODE_ENV === "development") {
+    mainWindow.loadURL("http://localhost:3000");
+  } else {
+    mainWindow.loadFile(path.join(__dirname, "..", "out", "index.html"));
+  }
 
   mainWindow.on("closed", () => {
     mainWindow = null;
@@ -54,10 +58,10 @@ ipcMain.handle("window-minimize", () => {
 });
 
 ipcMain.handle("logdir:add", async () => {
-  const result = await dialog.showOpenDialog({
+  const result = (await dialog.showOpenDialog({
     properties: ["openDirectory"],
     title: "ファイルを選択する",
-  }) as unknown as Electron.OpenDialogReturnValue;
+  })) as unknown as Electron.OpenDialogReturnValue;
 
   let setting: Tsetting = JsonManage.get("setting");
   if (!result.canceled) {
