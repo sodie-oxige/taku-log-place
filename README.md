@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 卓ログ置き場
 
-## Getting Started
+## 概要
 
-First, run the development server:
+TRPGのセッションログなどのhtmlファイルを管理閲覧するためのwindowsデスクトップアプリ。  
+複数フォルダのセッションログを一覧表示したり、並び変えたり（未実装）、絞り込んだり（未実装）、名前・日付・タグを記録したり（未実装）。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 機能
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### ログ一覧画面
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+ログファイルを表形式で一覧表示します。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+![基本画面](./doc/image01.png)
 
-## Learn More
+### ログ監視フォルダの設定
 
-To learn more about Next.js, take a look at the following resources:
+ログファイルを収めるフォルダを設定します。  
+画面左上の歯車マークのボタンをクリックすると監視するフォルダが一覧で表示されます。  
+追加ボタンで開くダイアログからフォルダを選択すれば、新たに登録することができます。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+![基本画面](./doc/image02.png)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### ログ閲覧画面
 
-## Deploy on Vercel
+ログ一覧画面の表からクリックでログ閲覧画面に遷移します。
+ログの中身が（ちょっぴり整形されて）表示され、閲覧することができます。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+![基本画面](./doc/image03.png)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 今後の実装予定
+
+- ログ一覧画面
+  - 名前や日時、タグの編集
+  - 名前や日時での並び替え
+- ログ監視フォルダの設定
+  - 設定したフォルダの削除機能  
+    現在はuser\AppData\Roaming\卓ログ置き場\setting.jsonからしか編集できません(´・ω・`)
+- ログ閲覧画面
+  - メイン、情報、雑談の表示差分化
+  - どこまで読んだかのブックマーク機能
+
+## 更新履歴
+
+- **v1.0.1** (2025-01-16)  
+  - 作成を忘れてたreadmeを追加
+  - ログ閲覧画面で改行後の文章が消えてしまうバグ修正
+- **v1.0.0** (2025-01-16)  
+  - ログ管理アプリ「卓ログ置き場」リリース！

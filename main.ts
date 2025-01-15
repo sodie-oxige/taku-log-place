@@ -115,6 +115,8 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
       } else if (name === "span") {
         isSpan = true;
         spanIndex++;
+      } else if (spanIndex === 3 && name === "br") {
+        currentLogdata.content += "\n";
       }
     },
     ontext(text) {
@@ -138,8 +140,9 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
         currentLogdata.content = currentLogdata.content.trim();
         res.push(currentLogdata);
         spanIndex = 0;
+      } else if (name === "span") {
+        isSpan = false;
       }
-      isSpan = false;
     },
   });
 
