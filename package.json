@@ -2,7 +2,7 @@
   "name": "taku-log-place",
   "productName": "卓ログ置き場",
   "description": "TRPGのセッションログを管理・閲覧するアプリ。",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "main": "dist/main.js",
   "scripts": {
