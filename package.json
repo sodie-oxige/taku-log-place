@@ -13,7 +13,8 @@
     "build:ts": "tsc",
     "start": "npm run build && electron .",
     "lint": "next lint",
-    "release": "npm run build && electron-builder --win --x64"
+    "clean": "rimraf dist out .next",
+    "release": "npm run clean && npm run build && electron-builder --win --x64"
   },
   "build": {
     "appId": "com.taku-log-place",
@@ -59,6 +60,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
     "postcss": "^8",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5",
     "wait-on": "^8.0.2"
