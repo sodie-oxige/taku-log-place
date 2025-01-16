@@ -17,8 +17,15 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import Pagination from "./_pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const columns: ColumnDef<TlogTableColumn>[] = [
   {
@@ -62,7 +69,8 @@ const IndexPage = () => {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
-  const maxPage = table.getPageCount();
+  const minPage = 0;
+  const maxPage = table.getPageCount() - 1;
   const currentPage = table.getState().pagination.pageIndex;
 
   const router = useRouter();
@@ -126,7 +134,79 @@ const IndexPage = () => {
           )}
         </TableBody>
       </Table>
-      <Pagination val={currentPage+1} max={maxPage} table={table} />
+      <Pagination className="mt-4">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => {
+                table.previousPage();
+              }}
+              aria-disabled={currentPage <= minPage}
+              tabIndex={currentPage <= minPage ? -1 : undefined}
+              className={
+                currentPage <= minPage ? "pointer-events-none opacity-50" : undefined
+              }
+            />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink
+              onClick={() => {
+                table.setPageIndex(minPage);
+              }}
+              isActive={currentPage == minPage}
+            >
+              {minPage+1}
+            </PaginationLink>
+          </PaginationItem>
+          {currentPage > minPage + 3 && (
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          )}
+          {[...Array(5)]
+            .map((_, i) => i + currentPage - 2)
+            .filter((i) => i > minPage && i < maxPage)
+            .map((i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  onClick={() => {
+                    table.setPageIndex(i);
+                  }}
+                  isActive={i == currentPage}
+                >
+                  {i+1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+          {currentPage < maxPage - 3 && (
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          )}
+          <PaginationItem>
+            <PaginationLink
+              onClick={() => {
+                table.setPageIndex(maxPage);
+              }}
+              isActive={currentPage == maxPage}
+            >
+              {maxPage+1}
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => {
+                table.nextPage();
+              }}
+              aria-disabled={currentPage >= maxPage}
+              tabIndex={currentPage >= maxPage ? -1 : undefined}
+              className={
+                currentPage >= maxPage ? "pointer-events-none opacity-50" : undefined
+              }
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </>
   );
 };
