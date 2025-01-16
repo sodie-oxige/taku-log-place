@@ -14,6 +14,8 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
@@ -26,18 +28,40 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 const columns: ColumnDef<TlogTableColumn>[] = [
   {
     accessorKey: "name",
-    header: "名前",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          名前
+          <ArrowUpDown className="ml-2" />
+        </Button>
+      );
+    },
     meta: {
       className: "truncate max-w-0 w-[50%]",
     },
   },
   {
     accessorKey: "date",
-    header: "日付",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          日付
+          <ArrowUpDown className="ml-2" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const date = new Date(row.getValue("date"));
       return date.toLocaleDateString();
@@ -57,6 +81,7 @@ const columns: ColumnDef<TlogTableColumn>[] = [
 
 const IndexPage = () => {
   const [logfile, setlogfile] = useState([] as TlogTableColumn[]);
+  const [sorting, setSorting] = useState<SortingState>([]);
   useEffect(() => {
     (async () => {
       const data = await window.electron.logfileGet();
@@ -68,6 +93,11 @@ const IndexPage = () => {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
   });
   const minPage = 0;
   const maxPage = table.getPageCount() - 1;
