@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Component, useEffect, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -11,8 +11,10 @@ import {
 } from "@/components/ui/table";
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
@@ -29,7 +31,16 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, CalendarIcon } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { DateRange } from "react-day-picker";
 
 const columns: ColumnDef<TlogTableColumn>[] = [
   {
@@ -69,6 +80,13 @@ const columns: ColumnDef<TlogTableColumn>[] = [
     meta: {
       className: "w-[10%] text-center",
     },
+    filterFn: (row, columnId, filterValue) => {
+      const rowDate = new Date(row.getValue(columnId));
+      let res = true;
+      if(!!filterValue?.from) res &&= rowDate >= filterValue.from
+      if(!!filterValue?.to) res &&= rowDate <= filterValue.to
+      return res;
+    },
   },
   {
     accessorKey: "tag",
@@ -82,6 +100,7 @@ const columns: ColumnDef<TlogTableColumn>[] = [
 const IndexPage = () => {
   const [logfile, setlogfile] = useState([] as TlogTableColumn[]);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   useEffect(() => {
     (async () => {
       const data = await window.electron.logfileGet();
@@ -95,8 +114,11 @@ const IndexPage = () => {
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
+      columnFilters,
     },
   });
   const minPage = 0;
@@ -107,8 +129,80 @@ const IndexPage = () => {
   const jump = (path: string) => {
     router.push(path);
   };
+
+  let clickType: "left" | "right" = "left";
+
+  const dateRange = table.getColumn("date")?.getFilterValue() as DateRange;
   return (
     <>
+      <div className="flex">
+        <div className="flex flex-col flex-1">
+          <Label htmlFor="search_text">name</Label>
+          <Input
+            id="search_text"
+            type="text"
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("name")?.setFilterValue(event.target.value)
+            }
+          />
+        </div>
+        <div className="flex flex-col flex-1">
+          <Label htmlFor="search_date">date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant={"outline"} id="search_date" className="flex">
+                <div className="flex-1">
+                  {(dateRange?.from && dateRange?.to && (
+                    <span>
+                      {dateRange.from.toLocaleDateString()} -{" "}
+                      {dateRange.to.toLocaleDateString()}
+                    </span>
+                  )) ||
+                    (dateRange?.from && (
+                      <span>{dateRange.from.toLocaleDateString()} -</span>
+                    )) ||
+                    (dateRange?.to && (
+                      <span>- {dateRange.to.toLocaleDateString()}</span>
+                    )) || <span></span>}
+                </div>
+                <CalendarIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto p-0"
+              onClick={(e) => {
+                clickType = "left";
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                clickType = "right";
+                const dayElement = (e.target as HTMLElement).closest(
+                  "button[name='day']"
+                ) as HTMLElement;
+                if (dayElement) dayElement.click();
+              }}
+            >
+              <Calendar
+                mode="range"
+                defaultMonth={dateRange?.from}
+                selected={dateRange}
+                onDayClick={(day) => {
+                  table.getColumn("date")?.setFilterValue({
+                    from: clickType == "left" ? day : dateRange?.from,
+                    to: clickType == "right" ? day : dateRange?.to,
+                  });
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div className="flex flex-col flex-1">
+          <Label htmlFor="search_tag">tag</Label>
+          <Input id="search_tag" type="text" placeholder="tag" />
+        </div>
+      </div>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -174,7 +268,9 @@ const IndexPage = () => {
               aria-disabled={currentPage <= minPage}
               tabIndex={currentPage <= minPage ? -1 : undefined}
               className={
-                currentPage <= minPage ? "pointer-events-none opacity-50" : undefined
+                currentPage <= minPage
+                  ? "pointer-events-none opacity-50"
+                  : undefined
               }
             />
           </PaginationItem>
@@ -185,7 +281,7 @@ const IndexPage = () => {
               }}
               isActive={currentPage == minPage}
             >
-              {minPage+1}
+              {minPage + 1}
             </PaginationLink>
           </PaginationItem>
           {currentPage > minPage + 3 && (
@@ -204,7 +300,7 @@ const IndexPage = () => {
                   }}
                   isActive={i == currentPage}
                 >
-                  {i+1}
+                  {i + 1}
                 </PaginationLink>
               </PaginationItem>
             ))}
@@ -220,7 +316,7 @@ const IndexPage = () => {
               }}
               isActive={currentPage == maxPage}
             >
-              {maxPage+1}
+              {maxPage + 1}
             </PaginationLink>
           </PaginationItem>
           <PaginationItem>
@@ -231,7 +327,9 @@ const IndexPage = () => {
               aria-disabled={currentPage >= maxPage}
               tabIndex={currentPage >= maxPage ? -1 : undefined}
               className={
-                currentPage >= maxPage ? "pointer-events-none opacity-50" : undefined
+                currentPage >= maxPage
+                  ? "pointer-events-none opacity-50"
+                  : undefined
               }
             />
           </PaginationItem>
