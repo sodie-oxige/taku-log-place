@@ -12,6 +12,7 @@ import {
 import {
   ColumnDef,
   ColumnFiltersState,
+  ColumnMeta,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -41,6 +42,14 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuLabel,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { Badge } from "@/components/ui/badge";
 
 const columns: ColumnDef<TlogTableColumn>[] = [
   {
@@ -57,17 +66,18 @@ const columns: ColumnDef<TlogTableColumn>[] = [
       );
     },
     meta: {
-      className: "truncate max-w-0 w-[50%]",
+      th: "w-[50%] text-center",
+      td: "truncate max-w-0",
     },
-    filterFn: (row, columnId, filterValue :string)=>{
+    filterFn: (row, columnId, filterValue: string) => {
       const filterValues = filterValue.split(" ");
       const rowText = row.getValue(columnId) as string;
       let res = true;
-      filterValues.forEach(f => {
+      filterValues.forEach((f) => {
         res &&= rowText.includes(f);
       });
       return res;
-    }
+    },
   },
   {
     accessorKey: "date",
@@ -87,7 +97,8 @@ const columns: ColumnDef<TlogTableColumn>[] = [
       return date.toLocaleDateString();
     },
     meta: {
-      className: "w-[10%] text-center",
+      th: "w-[10em] text-center",
+      td: "text-center",
     },
     filterFn: (row, columnId, filterValue) => {
       const rowDate = new Date(row.getValue(columnId));
@@ -100,8 +111,16 @@ const columns: ColumnDef<TlogTableColumn>[] = [
   {
     accessorKey: "tag",
     header: "タグ",
+    cell: ({ row }) => (
+      <div className="flex gap-1 px-2 overflow-auto">
+        {(row.getValue("tag") as string[]).map((t, i) => (
+          <Badge key={`tag_${row.id}_${i}`}>{t}</Badge>
+        ))}
+      </div>
+    ),
     meta: {
-      className: "w-[40%]",
+      th: "w-[40%] text-center",
+      td: "relative px-0 mask-gradient",
     },
   },
 ];
@@ -139,6 +158,47 @@ const IndexPage = () => {
     router.push(path);
   };
 
+  interface TmodifierData {
+    data: TlogTableColumn;
+    set: (path: string, type: "name" | "date" | "tag", data: unknown) => void;
+  }
+  const modifier: TmodifierData = {
+    data: {
+      name: "",
+      path: "",
+      date: 0,
+      tag: [],
+    },
+    set: (id, type, data) => {
+      const row = table.getRow(id);
+      if (modifier.data?.path != row.original.path)
+        modifier.data = row.original;
+      switch (type) {
+        case "name":
+          if (typeof data != "string") return;
+          modifier.data.name = data;
+          break;
+        case "date":
+          if (!(data instanceof Date)) return;
+          modifier.data.date = data.getTime();
+          break;
+        case "tag":
+          if (
+            Array.isArray(data) &&
+            data.reduce((s, i) => s || typeof i != "string", false)
+          )
+            return;
+          modifier.data.tag = data as string[];
+          break;
+        default:
+          return;
+      }
+      setlogfile((prev) =>
+        prev.map((l) => (l.path == modifier.data.path ? modifier.data : l))
+      );
+    },
+  };
+
   let clickType: "left" | "right" = "left";
 
   const dateRange = table.getColumn("date")?.getFilterValue() as DateRange;
@@ -146,7 +206,9 @@ const IndexPage = () => {
     <>
       <div className="mb-3 flex gap-2">
         <div className="flex flex-col flex-1">
-          <Label htmlFor="search_text" className="text-sm text-gray-500">name</Label>
+          <Label htmlFor="search_text" className="text-sm text-gray-500">
+            name
+          </Label>
           <Input
             id="search_text"
             type="text"
@@ -157,7 +219,9 @@ const IndexPage = () => {
           />
         </div>
         <div className="flex flex-col flex-1">
-          <Label htmlFor="search_date" className="text-sm text-gray-500">date</Label>
+          <Label htmlFor="search_date" className="text-sm text-gray-500">
+            date
+          </Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant={"outline"} id="search_date" className="flex">
@@ -228,17 +292,25 @@ const IndexPage = () => {
           </Popover>
         </div>
         <div className="flex flex-col flex-1">
-          <Label htmlFor="search_tag" className="text-sm text-gray-500">tag</Label>
+          <Label htmlFor="search_tag" className="text-sm text-gray-500">
+            tag
+          </Label>
           <Input id="search_tag" type="text" placeholder="tag" />
         </div>
       </div>
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className="text-center">
+                  <TableHead
+                    key={header.id}
+                    className={
+                      // @ts-expect-error: th設定済み
+                      header.column.columnDef.meta.th
+                    }
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -254,29 +326,74 @@ const IndexPage = () => {
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                onClick={() => {
-                  const path =
-                    "./detail?id=" + encodeURIComponent(row.original.path);
-                  jump(path);
-                }}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className={
-                      !!cell.column.columnDef.meta
-                        ? // @ts-expect-error: classNameが型では定義さててないので
-                          cell.column.columnDef.meta?.className
-                        : ""
-                    }
+              <ContextMenu key={row.id}>
+                <ContextMenuTrigger asChild>
+                  <TableRow
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={() => {
+                      const path =
+                        "./detail?id=" + encodeURIComponent(row.original.path);
+                      jump(path);
+                    }}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className={
+                          // @ts-expect-error: td設定済み
+                          cell.column.columnDef.meta.td
+                        }
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </ContextMenuTrigger>
+                <ContextMenuContent>
+                  <ContextMenuLabel>データ編集</ContextMenuLabel>
+                  <ContextMenuGroup>
+                    <div className="flex flex-col p-1">
+                      <Label className="text-xs text-gray-500">name</Label>
+                      <Input
+                        type="text"
+                        defaultValue={row.original.name}
+                        onChange={(e) => {
+                          modifier.set(row.id, "name", e.target.value);
+                        }}
+                      ></Input>
+                    </div>
+                    <div className="flex flex-col p-1">
+                      <Label className="text-xs text-gray-500">date</Label>
+                      <Calendar
+                        selected={new Date(row.original.date)}
+                        onDayClick={(date) => {
+                          modifier.set(row.id, "date", date);
+                        }}
+                      />
+                    </div>
+                    <div className="flex flex-col p-1">
+                      <Label className="text-xs text-gray-500">tag</Label>
+                      <Input
+                        type="text"
+                        defaultValue={row.original.tag}
+                        onChange={(e) => {
+                          modifier.set(
+                            row.id,
+                            "tag",
+                            e.target.value.split(" ").filter((i) => i)
+                          );
+                        }}
+                      ></Input>
+                    </div>
+                    <Button className="m-1 right-0" onClick={() => {}}>
+                      更新
+                    </Button>
+                  </ContextMenuGroup>
+                </ContextMenuContent>
+              </ContextMenu>
             ))
           ) : (
             <TableRow>

@@ -83,4 +83,24 @@ body {
   header :is(a, button) {
     -webkit-app-region: no-drag;
   }
+  .mask-gradient {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 0.5rem,
+      black calc(100% - 0.5rem),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 0.5rem,
+      black calc(100% - 0.5rem),
+      transparent
+    );
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
 }
