@@ -59,6 +59,15 @@ const columns: ColumnDef<TlogTableColumn>[] = [
     meta: {
       className: "truncate max-w-0 w-[50%]",
     },
+    filterFn: (row, columnId, filterValue :string)=>{
+      const filterValues = filterValue.split(" ");
+      const rowText = row.getValue(columnId) as string;
+      let res = true;
+      filterValues.forEach(f => {
+        res &&= rowText.includes(f);
+      });
+      return res;
+    }
   },
   {
     accessorKey: "date",
@@ -83,8 +92,8 @@ const columns: ColumnDef<TlogTableColumn>[] = [
     filterFn: (row, columnId, filterValue) => {
       const rowDate = new Date(row.getValue(columnId));
       let res = true;
-      if(!!filterValue?.from) res &&= rowDate >= filterValue.from
-      if(!!filterValue?.to) res &&= rowDate <= filterValue.to
+      if (!!filterValue?.from) res &&= rowDate >= filterValue.from;
+      if (!!filterValue?.to) res &&= rowDate <= filterValue.to;
       return res;
     },
   },
@@ -135,9 +144,9 @@ const IndexPage = () => {
   const dateRange = table.getColumn("date")?.getFilterValue() as DateRange;
   return (
     <>
-      <div className="flex">
+      <div className="mb-3 flex gap-2">
         <div className="flex flex-col flex-1">
-          <Label htmlFor="search_text">name</Label>
+          <Label htmlFor="search_text" className="text-sm text-gray-500">name</Label>
           <Input
             id="search_text"
             type="text"
@@ -148,7 +157,7 @@ const IndexPage = () => {
           />
         </div>
         <div className="flex flex-col flex-1">
-          <Label htmlFor="search_date">date</Label>
+          <Label htmlFor="search_date" className="text-sm text-gray-500">date</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant={"outline"} id="search_date" className="flex">
@@ -194,12 +203,32 @@ const IndexPage = () => {
                   });
                 }}
                 initialFocus
+                footer={
+                  <>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        table.getColumn("date")?.setFilterValue(null);
+                      }}
+                    >
+                      clear
+                    </Button>
+                    <div className="mt-2 mx-auto text-xs text-gray-500">
+                      左クリックで<span className="font-semibold">開始日</span>
+                      を設定、
+                      <br />
+                      右クリックで <span className="font-semibold">終了日</span>
+                      を設定できます。
+                    </div>
+                  </>
+                }
               />
             </PopoverContent>
           </Popover>
         </div>
         <div className="flex flex-col flex-1">
-          <Label htmlFor="search_tag">tag</Label>
+          <Label htmlFor="search_tag" className="text-sm text-gray-500">tag</Label>
           <Input id="search_tag" type="text" placeholder="tag" />
         </div>
       </div>
