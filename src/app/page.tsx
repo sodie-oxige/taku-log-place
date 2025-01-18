@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -12,7 +12,6 @@ import {
 import {
   ColumnDef,
   ColumnFiltersState,
-  ColumnMeta,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -244,7 +243,7 @@ const IndexPage = () => {
             </PopoverTrigger>
             <PopoverContent
               className="w-auto p-0"
-              onClick={(e) => {
+              onClick={() => {
                 clickType = "left";
               }}
               onContextMenu={(e) => {
