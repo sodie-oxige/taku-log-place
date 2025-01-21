@@ -49,6 +49,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Badge } from "@/components/ui/badge";
+import { ja } from "date-fns/locale/ja";
 
 const columns: ColumnDef<TlogTableColumn>[] = [
   {
@@ -113,7 +114,7 @@ const columns: ColumnDef<TlogTableColumn>[] = [
     cell: ({ row }) => (
       <div className="flex gap-1 px-2 overflow-auto">
         {(row.getValue("tag") as string[]).map((t, i) => (
-          <Badge key={`tag_${row.id}_${i}`}>{t}</Badge>
+          <Badge key={`tag_${row.id}_${i}`} className="whitespace-nowrap">{t}</Badge>
         ))}
       </div>
     ),
@@ -258,6 +259,7 @@ const IndexPage = () => {
             >
               <Calendar
                 mode="range"
+                locale={ja}
                 defaultMonth={dateRange?.from}
                 selected={dateRange}
                 onDayClick={(day) => {
@@ -368,7 +370,9 @@ const IndexPage = () => {
                     <div className="flex flex-col p-1">
                       <Label className="text-xs text-gray-500">date</Label>
                       <Calendar
+                        locale={ja}
                         selected={new Date(row.original.date)}
+                        defaultMonth={new Date(row.original.date || Date.now())}
                         onDayClick={(date) => {
                           modifier.set(row.id, "date", date);
                         }}
