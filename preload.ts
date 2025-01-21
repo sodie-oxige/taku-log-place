@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("electron", {
   windowMinimize: () => ipcRenderer.invoke("window-minimize"),
   logdirAdd: async () => ipcRenderer.invoke("logdir:add"),
   logdirGet: () => ipcRenderer.invoke("logdir:get"),
-  logfileGet: () => ipcRenderer.invoke("logfile:get"),
+  logfilesGet: () => ipcRenderer.invoke("logfiles:get"),
+  logfileSet: (data: TlogTableColumn) => ipcRenderer.invoke("logfile:set", data),
   logdataGet: (id: string) => ipcRenderer.invoke("logdata:get", id),
 });

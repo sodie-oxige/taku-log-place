@@ -130,7 +130,7 @@ const IndexPage = () => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   useEffect(() => {
     (async () => {
-      const data = await window.electron.logfileGet();
+      const data = await window.electron.logfilesGet();
       setlogfile(data);
     })();
   }, []);
@@ -192,6 +192,7 @@ const IndexPage = () => {
         default:
           return;
       }
+      window.electron.logfileSet(modifier.data);
       setlogfile((prev) =>
         prev.map((l) => (l.path == modifier.data.path ? modifier.data : l))
       );
@@ -387,9 +388,6 @@ const IndexPage = () => {
                         }}
                       ></Input>
                     </div>
-                    <Button className="m-1 right-0" onClick={() => {}}>
-                      更新
-                    </Button>
                   </ContextMenuGroup>
                 </ContextMenuContent>
               </ContextMenu>
