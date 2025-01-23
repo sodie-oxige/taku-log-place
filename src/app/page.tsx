@@ -31,7 +31,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, CalendarIcon } from "lucide-react";
+import { ArrowUpDown, CalendarIcon, Check } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,6 +49,14 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Badge } from "@/components/ui/badge";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command";
 import { ja } from "date-fns/locale/ja";
 
 const columns: ColumnDef<TlogTableColumn>[] = [
@@ -114,13 +122,23 @@ const columns: ColumnDef<TlogTableColumn>[] = [
     cell: ({ row }) => (
       <div className="flex gap-1 px-2 overflow-auto">
         {(row.getValue("tag") as string[]).map((t, i) => (
-          <Badge key={`tag_${row.id}_${i}`} className="whitespace-nowrap">{t}</Badge>
+          <Badge key={`tag_${row.id}_${i}`} className="whitespace-nowrap">
+            {t}
+          </Badge>
         ))}
       </div>
     ),
     meta: {
       th: "w-[40%] text-center",
       td: "relative px-0 mask-gradient",
+    },
+    filterFn: (row, columnId, filterValue: string[]) => {
+      const rowTags = row.getValue(columnId) as string[];
+      let res = true;
+      filterValue.forEach((f) => {
+        res &&= rowTags.includes(f);
+      });
+      return res;
     },
   },
 ];
@@ -157,6 +175,20 @@ const IndexPage = () => {
   const jump = (path: string) => {
     router.push(path);
   };
+
+  interface Tcommand {
+    value: string;
+    label: string;
+  }
+  let taglist: Tcommand[] = logfile.reduce(
+    (a, l) =>
+      a.concat(
+        l.tag.map((t) => ({ value: t.trim(), label: t.trim() } as Tcommand))
+      ),
+    [] as Tcommand[]
+  );
+  taglist.sort((a, b) => a.label.localeCompare(b.label, "ja"));
+  taglist = taglist.filter((e, i, a) => !(i && a[i - 1].label == e.label));
 
   interface TmodifierData {
     data: TlogTableColumn;
@@ -203,10 +235,12 @@ const IndexPage = () => {
   let clickType: "left" | "right" = "left";
 
   const dateRange = table.getColumn("date")?.getFilterValue() as DateRange;
+  const selectedTag = (table.getColumn("tag")?.getFilterValue() ||
+    []) as string[];
   return (
     <>
       <div className="mb-3 flex gap-2">
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col w-[33%]">
           <Label htmlFor="search_text" className="text-sm text-gray-500">
             name
           </Label>
@@ -219,7 +253,7 @@ const IndexPage = () => {
             }
           />
         </div>
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col w-[33%]">
           <Label htmlFor="search_date" className="text-sm text-gray-500">
             date
           </Label>
@@ -293,11 +327,57 @@ const IndexPage = () => {
             </PopoverContent>
           </Popover>
         </div>
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col w-[33%]">
           <Label htmlFor="search_tag" className="text-sm text-gray-500">
             tag
           </Label>
-          <Input id="search_tag" type="text" placeholder="tag" />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant={"outline"} id="search_tag" className="flex justify-start overflow-x-auto">
+                {selectedTag?.length
+                  ? selectedTag.map((s, i) => (
+                      <Badge key={`selectedtag_${i}`}>
+                        {taglist.find((t) => t.value == s)?.label}
+                      </Badge>
+                    ))
+                  : ""}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Command>
+                <CommandInput/>
+                <CommandList>
+                  <CommandEmpty>タグが見つかりませんでした。</CommandEmpty>
+                  <CommandGroup>
+                    {taglist.map((tag) => (
+                      <CommandItem
+                        key={tag.value}
+                        value={tag.value}
+                        onSelect={(currentValue) => {
+                          table
+                            .getColumn("tag")
+                            ?.setFilterValue(
+                              selectedTag?.includes(currentValue)
+                                ? selectedTag.filter((e) => e != currentValue)
+                                : selectedTag.concat(currentValue)
+                            );
+                        }}
+                      >
+                        <Check
+                          className={`mr-2 h-4 w-4 ${
+                            selectedTag?.includes(tag.value)
+                              ? "opacity-100"
+                              : "opacity-0"
+                          }`}
+                        />
+                        {tag.label}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
       <Table className="table-fixed">
