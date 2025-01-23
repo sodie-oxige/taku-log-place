@@ -333,7 +333,11 @@ const IndexPage = () => {
           </Label>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant={"outline"} id="search_tag" className="flex justify-start overflow-x-auto">
+              <Button
+                variant={"outline"}
+                id="search_tag"
+                className="flex justify-start overflow-x-auto"
+              >
                 {selectedTag?.length
                   ? selectedTag.map((s, i) => (
                       <Badge key={`selectedtag_${i}`}>
@@ -345,7 +349,7 @@ const IndexPage = () => {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
               <Command>
-                <CommandInput/>
+                <CommandInput />
                 <CommandList>
                   <CommandEmpty>タグが見つかりませんでした。</CommandEmpty>
                   <CommandGroup>
@@ -536,16 +540,18 @@ const IndexPage = () => {
               <PaginationEllipsis />
             </PaginationItem>
           )}
-          <PaginationItem>
-            <PaginationLink
-              onClick={() => {
-                table.setPageIndex(maxPage);
-              }}
-              isActive={currentPage == maxPage}
-            >
-              {maxPage + 1}
-            </PaginationLink>
-          </PaginationItem>
+          {minPage < maxPage && (
+            <PaginationItem>
+              <PaginationLink
+                onClick={() => {
+                  table.setPageIndex(maxPage);
+                }}
+                isActive={currentPage == maxPage}
+              >
+                {maxPage + 1}
+              </PaginationLink>
+            </PaginationItem>
+          )}
           <PaginationItem>
             <PaginationNext
               onClick={() => {
