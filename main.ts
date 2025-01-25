@@ -76,22 +76,41 @@ ipcMain.handle("logdir:get", () => {
   return setting.logdir;
 });
 
-ipcMain.handle("logfile:get", () => {
+ipcMain.handle("logfiles:get", () => {
   const setting: Tsetting = JsonManage.get("setting");
   const logfiles: string[] = setting.logdir
     .map((d) => readDirSyncSub(d))
     .flat()
     .filter((p) => /\.html?$/.test(p));
   const res: TlogTableColumn[] = logfiles.map((l) => {
-    const splittedPath = l.split("\\");
+    const dirPath = path.dirname(l);
+    const fileName = path.basename(l);
+    const jsonName = dirPath;
+    const jsonPath = path.resolve(dirPath, "modifier.json");
+    if (!JsonManage.isDefined(jsonName))
+      JsonManage.init(jsonName, jsonPath, {});
+    const data: TlogTableColumn = (
+      JsonManage.get(jsonName) as Record<string, TlogTableColumn>
+    )[fileName];
     return {
-      name: splittedPath[splittedPath.length - 1],
+      name: data?.name || fileName,
       path: l,
-      date: 0,
-      tag: [],
+      date: data?.date || 0,
+      tag: data?.tag || [],
     };
   });
   return res;
+});
+
+ipcMain.handle("logfile:set", (_event, data: TlogTableColumn) => {
+  const dirPath = path.dirname(data.path);
+  const fileaName = path.basename(data.path);
+  const jsonName = dirPath;
+  const jsonPath = path.resolve(dirPath, "modifier.json");
+  if (!JsonManage.isDefined(jsonName)) JsonManage.init(jsonName, jsonPath, {});
+  let modifierJson: Record<string, TlogTableColumn> = JsonManage.get(jsonName);
+  modifierJson[fileaName] = data;
+  JsonManage.update(jsonName, modifierJson);
 });
 
 ipcMain.handle("logdata:get", (_event, id: string) => {

@@ -8,7 +8,8 @@ declare global {
       windowMinimize: () => void;
       logdirAdd: () => Promise<string[] | null>;
       logdirGet: () => string[] | null;
-      logfileGet: () => TlogTableColumn[];
+      logfilesGet: () => TlogTableColumn[];
+      logfileSet: (TlogTableColumn) => void;
       logdataGet: (string) => Tlogdata[];
     };
   }

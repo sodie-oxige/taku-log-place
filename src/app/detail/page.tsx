@@ -12,7 +12,6 @@ const DetailPageComponent = () => {
   useEffect(() => {
     (async () => {
       const res = await window.electron.logdataGet(id);
-      console.log(res);
       setLogdata(res);
     })();
   }, [searchParams]);
