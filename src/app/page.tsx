@@ -466,7 +466,7 @@ const IndexPage = () => {
                       <Label className="text-xs text-gray-500">tag</Label>
                       <Input
                         type="text"
-                        defaultValue={row.original.tag}
+                        defaultValue={row.original.tag.join(" ")}
                         onChange={(e) => {
                           modifier.set(
                             row.id,
