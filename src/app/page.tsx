@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -17,6 +17,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  PaginationState,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -144,9 +145,14 @@ const columns: ColumnDef<TlogTableColumn>[] = [
 ];
 
 const IndexPage = () => {
-  const [logfile, setlogfile] = useState([] as TlogTableColumn[]);
+  const [logfile, setlogfile] = useState<TlogTableColumn[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const isDataUpdating = useRef(false); // setlogfileでonPaginationChangeが発火しないようにするためのフラグ
   useEffect(() => {
     (async () => {
       const data = await window.electron.logfilesGet();
@@ -165,6 +171,14 @@ const IndexPage = () => {
     state: {
       sorting,
       columnFilters,
+      pagination,
+    },
+    onPaginationChange: (updater) => {
+      if (isDataUpdating.current) return;
+      const newPagination =
+        typeof updater === "function" ? updater(pagination) : updater;
+      console.log(newPagination);
+      setPagination(newPagination);
     },
   });
   const minPage = 0;
@@ -226,9 +240,13 @@ const IndexPage = () => {
           return;
       }
       window.electron.logfileSet(modifier.data);
+      isDataUpdating.current = true;
       setlogfile((prev) =>
         prev.map((l) => (l.path == modifier.data.path ? modifier.data : l))
       );
+      setTimeout(() => {
+        isDataUpdating.current = false;
+      }, 0);
     },
   };
 
