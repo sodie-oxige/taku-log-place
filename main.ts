@@ -77,9 +77,9 @@ ipcMain.handle("logdir:get", () => {
 });
 
 ipcMain.handle("logfiles:get", () => {
-  const setting: Tsetting = JsonManage.get("setting");
+  const setting: Tsetting = JsonManage.getFresh("setting");
   const logfiles: string[] = setting.logdir
-    .map((d) => readDirSyncSub(d))
+    .map((d) => fs.readdirSync(d).map((f) => path.join(d, f)))
     .flat()
     .filter((p) => /\.html?$/.test(p));
   const res: TlogTableColumn[] = logfiles.map((l) => {

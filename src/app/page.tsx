@@ -59,6 +59,7 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { ja } from "date-fns/locale/ja";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const columns: ColumnDef<TlogTableColumn>[] = [
   {
@@ -146,6 +147,7 @@ const columns: ColumnDef<TlogTableColumn>[] = [
 
 const IndexPage = () => {
   const [logfile, setlogfile] = useState<TlogTableColumn[]>([]);
+  const isLogfileLoaded = useRef(false); // logfileのロードが完了したかのフラグ
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -157,6 +159,7 @@ const IndexPage = () => {
     (async () => {
       const data = await window.electron.logfilesGet();
       setlogfile(data);
+      isLogfileLoaded.current = true;
     })();
   }, []);
   const table = useReactTable({
@@ -428,7 +431,17 @@ const IndexPage = () => {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          {!isLogfileLoaded.current ? (
+            [...Array(10)].map((_, i) => (
+              <TableRow key={`row_skeleton_${i}`}>
+                {[...Array(3)].map((_, j) => (
+                  <TableCell key={`cell_skeleton_${i}_${j}`}>
+                    <Skeleton className="w-full h-5" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <ContextMenu key={row.id}>
                 <ContextMenuTrigger asChild>
