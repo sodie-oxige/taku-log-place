@@ -148,7 +148,7 @@ const columns: ColumnDef<TlogTableColumn>[] = [
 const IndexPage = () => {
   const [logfile, setlogfile] = useState<TlogTableColumn[]>([]);
   const isLogfileLoaded = useRef(false); // logfileのロードが完了したかのフラグ
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: "date", desc: true }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
