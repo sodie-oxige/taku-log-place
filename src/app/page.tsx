@@ -132,7 +132,7 @@ const columns: ColumnDef<TlogTableColumn>[] = [
     ),
     meta: {
       th: "w-[40%] text-center",
-      td: "relative px-0 mask-gradient",
+      td: "relative p-0 mask-gradient",
     },
     filterFn: (row, columnId, filterValue: string[]) => {
       const rowTags = row.getValue(columnId) as string[];
