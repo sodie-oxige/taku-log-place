@@ -5,7 +5,7 @@ import { Fragment, Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const DetailPage = () => {
+const DetailPageComponent = () => {
   const [logdata, setLogdata] = useState<Tlogdata[]>([]);
   const isLogdataLoaded = useRef(false); // logdataのロードが完了したかのフラグ
   const searchParams = useSearchParams();
@@ -58,6 +58,14 @@ const DetailPage = () => {
             </Fragment>
           ))}
     </div>
+  );
+};
+
+const DetailPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DetailPageComponent />
+    </Suspense>
   );
 };
 
