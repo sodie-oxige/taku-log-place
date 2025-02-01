@@ -57,6 +57,11 @@ ipcMain.handle("window-minimize", () => {
   mainWindow.minimize();
 });
 
+ipcMain.handle("logdir:get", () => {
+  const setting: Tsetting = JsonManage.get("setting");
+  return setting.logdir;
+});
+
 ipcMain.handle("logdir:add", async () => {
   const result = (await dialog.showOpenDialog({
     properties: ["openDirectory"],
@@ -71,8 +76,10 @@ ipcMain.handle("logdir:add", async () => {
   return setting.logdir;
 });
 
-ipcMain.handle("logdir:get", () => {
-  const setting: Tsetting = JsonManage.get("setting");
+ipcMain.handle("logdir:delete", (_event, deleteDir: string) => {
+  let setting: Tsetting = JsonManage.get("setting");
+  setting.logdir = setting.logdir.filter((d) => d != deleteDir);
+  JsonManage.update<Tsetting>("setting", setting);
   return setting.logdir;
 });
 

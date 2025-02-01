@@ -7,7 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { Cog, Shrink, Maximize, X } from "lucide-react";
+import { Cog, Shrink, Maximize, X, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -21,7 +21,7 @@ const winMinimize = () => {
   window.electron.windowMinimize();
 };
 
-const Header = () => {
+const Header = ({ onTriggerReload }: { onTriggerReload: () => void }) => {
   const [logdir, setLogdir] = useState<string[]>([]);
   useEffect(() => {
     (async () => {
@@ -33,6 +33,13 @@ const Header = () => {
   const addLogdir = async () => {
     const logdir = await window.electron.logdirAdd();
     if (logdir && logdir.length <= 0) setLogdir(logdir);
+    onTriggerReload();
+  };
+
+  const deleteLogdir = (dir: string) => {
+    const logdir = window.electron.logdirDelete(dir);
+    if (logdir && logdir.length <= 0) setLogdir(logdir);
+    onTriggerReload();
   };
 
   return (
@@ -48,7 +55,13 @@ const Header = () => {
             ログ監視フォルダ
           </DropdownMenuLabel>
           {logdir.map((l) => (
-            <DropdownMenuLabel key={l}>{l}</DropdownMenuLabel>
+            <DropdownMenuLabel key={l} className="flex justify-between">
+              {l}
+              <Trash2
+                className="text-red-500"
+                onClick={() => deleteLogdir(l)}
+              />
+            </DropdownMenuLabel>
           ))}
           <DropdownMenuLabel className="text-lg font-bold">
             <Button onClick={addLogdir}>追加</Button>

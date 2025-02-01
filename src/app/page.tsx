@@ -180,7 +180,6 @@ const IndexPage = () => {
       if (isDataUpdating.current) return;
       const newPagination =
         typeof updater === "function" ? updater(pagination) : updater;
-      console.log(newPagination);
       setPagination(newPagination);
     },
   });
