@@ -21,7 +21,7 @@ const winMinimize = () => {
   window.electron.windowMinimize();
 };
 
-const Header = () => {
+const Header = ({ onTriggerReload }: { onTriggerReload: () => void }) => {
   const [logdir, setLogdir] = useState<string[]>([]);
   useEffect(() => {
     (async () => {
@@ -33,11 +33,13 @@ const Header = () => {
   const addLogdir = async () => {
     const logdir = await window.electron.logdirAdd();
     if (logdir && logdir.length <= 0) setLogdir(logdir);
+    onTriggerReload();
   };
 
   const deleteLogdir = (dir: string) => {
     const logdir = window.electron.logdirDelete(dir);
     if (logdir && logdir.length <= 0) setLogdir(logdir);
+    onTriggerReload();
   };
 
   return (

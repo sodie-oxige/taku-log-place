@@ -13,7 +13,6 @@ const DetailPageComponent = () => {
 
   useEffect(() => {
     (async () => {
-      console.log(id);
       const res = await window.electron.logdataGet(id);
       setLogdata(res);
       isLogdataLoaded.current = true;
