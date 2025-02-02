@@ -123,16 +123,16 @@ const SystemStatement = ({ statement }: { statement: Tlogdata }) => {
   };
   return (
     <div className="flex flex-col items-center p-2.5">
-      <p className="text-xs font-bold">
-        <span className="absolute mr-2 right-[50%]">{data.name}</span>:
-        <span className="absolute ml-2 left-[50%]">{data.tab}</span>
+      <p className="relative text-xs font-bold">
+        <span className="absolute mr-2 right-[50%] whitespace-nowrap">{data.name}</span>:
+        <span className="absolute ml-2 left-[50%] whitespace-nowrap">{data.tab}</span>
       </p>
-      <p className="ml-1 relative w-fit  font-mono font-bold oldstyle-nums">
-        <span className="absolute mr-4 bottom-0 right-[50%]">
-          {data.before}{" "}
+      <p className="relative w-fit  font-mono font-bold oldstyle-nums">
+        <span className="absolute mr-4 bottom-0 right-[50%] whitespace-nowrap">
+          {data.before}
         </span>
         &gt;&gt;
-        <span className="text-lg absolute ml-4 bottom-0 left-[50%]">
+        <span className="text-lg absolute ml-4 bottom-0 left-[50%] whitespace-nowrap">
           {data.after}
         </span>
       </p>
@@ -143,7 +143,7 @@ const SystemStatement = ({ statement }: { statement: Tlogdata }) => {
 const InfoStatement = ({ statement }: { statement: Tlogdata }) => {
   return (
     <div
-      className="m-1 mx-16 flex flex-col border-x"
+      className="m-1 mx-16 flex flex-col px-2 border-x"
       style={
         {
           "--c": statement.color,
