@@ -43,7 +43,7 @@ const Header = ({ onTriggerReload }: { onTriggerReload: () => void }) => {
   };
 
   return (
-    <header className="fixed t-0 l-0 z-50 flex justify-center items-center w-screen px-2 h-12 bg-background shadow-md">
+    <header className="relative flex justify-center items-center w-screen px-2 h-12 bg-background shadow-md">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline">

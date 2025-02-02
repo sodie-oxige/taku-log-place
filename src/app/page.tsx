@@ -60,6 +60,7 @@ import {
 } from "@/components/ui/command";
 import { ja } from "date-fns/locale/ja";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const columns: ColumnDef<TlogTableColumn>[] = [
   {
@@ -122,13 +123,16 @@ const columns: ColumnDef<TlogTableColumn>[] = [
     accessorKey: "tag",
     header: "タグ",
     cell: ({ row }) => (
-      <div className="flex gap-1 px-2 overflow-auto">
-        {(row.getValue("tag") as string[]).map((t, i) => (
-          <Badge key={`tag_${row.id}_${i}`} className="whitespace-nowrap">
-            {t}
-          </Badge>
-        ))}
-      </div>
+      <ScrollArea>
+        <div className="flex gap-1 px-2 overflow-auto">
+          {(row.getValue("tag") as string[]).map((t, i) => (
+            <Badge key={`tag_${row.id}_${i}`} className="whitespace-nowrap">
+              {t}
+            </Badge>
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" className="hidden" />
+      </ScrollArea>
     ),
     meta: {
       th: "w-[40%] text-center",
@@ -148,7 +152,9 @@ const columns: ColumnDef<TlogTableColumn>[] = [
 const IndexPage = () => {
   const [logfile, setlogfile] = useState<TlogTableColumn[]>([]);
   const isLogfileLoaded = useRef(false); // logfileのロードが完了したかのフラグ
-  const [sorting, setSorting] = useState<SortingState>([{ id: "date", desc: true }]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "date", desc: true },
+  ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
