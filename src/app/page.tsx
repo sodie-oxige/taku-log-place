@@ -156,9 +156,11 @@ const IndexPage = () => {
     { id: "date", desc: true },
   ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const pageIndex = 0;
+  const pageSize = 10;
   const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
+    pageIndex,
+    pageSize,
   });
   const isDataUpdating = useRef(false); // setlogfileでonPaginationChangeが発火しないようにするためのフラグ
   useEffect(() => {
@@ -263,9 +265,11 @@ const IndexPage = () => {
   const dateRange = table.getColumn("date")?.getFilterValue() as DateRange;
   const selectedTag = (table.getColumn("tag")?.getFilterValue() ||
     []) as string[];
+
+  const rowSpan = pageSize - table.getRowModel().rows?.length;
   return (
     <>
-      <div className="mb-3 flex gap-2">
+      <div className="my-3 flex gap-2">
         <div className="flex flex-col w-[33%]">
           <Label htmlFor="search_text" className="text-sm text-gray-500">
             name
@@ -447,75 +451,91 @@ const IndexPage = () => {
               </TableRow>
             ))
           ) : table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <ContextMenu key={row.id}>
-                <ContextMenuTrigger asChild>
-                  <TableRow
-                    data-state={row.getIsSelected() && "selected"}
-                    onClick={() => {
-                      const path =
-                        "./detail?id=" + encodeURIComponent(row.original.path);
-                      jump(path);
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={
-                          // @ts-expect-error: td設定済み
-                          cell.column.columnDef.meta.td
-                        }
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </ContextMenuTrigger>
-                <ContextMenuContent>
-                  <ContextMenuLabel>データ編集</ContextMenuLabel>
-                  <ContextMenuGroup>
-                    <div className="flex flex-col p-1">
-                      <Label className="text-xs text-gray-500">name</Label>
-                      <Input
-                        type="text"
-                        defaultValue={row.original.name}
-                        onChange={(e) => {
-                          modifier.set(row.id, "name", e.target.value);
-                        }}
-                      ></Input>
-                    </div>
-                    <div className="flex flex-col p-1">
-                      <Label className="text-xs text-gray-500">date</Label>
-                      <Calendar
-                        locale={ja}
-                        selected={new Date(row.original.date)}
-                        defaultMonth={new Date(row.original.date || Date.now())}
-                        onDayClick={(date) => {
-                          modifier.set(row.id, "date", date);
-                        }}
-                      />
-                    </div>
-                    <div className="flex flex-col p-1">
-                      <Label className="text-xs text-gray-500">tag</Label>
-                      <Input
-                        type="text"
-                        defaultValue={row.original.tag.join(" ")}
-                        onChange={(e) => {
-                          modifier.set(
-                            row.id,
-                            "tag",
-                            e.target.value.split(" ").filter((i) => i)
-                          );
-                        }}
-                      ></Input>
-                    </div>
-                  </ContextMenuGroup>
-                </ContextMenuContent>
-              </ContextMenu>
-            ))
+            <>
+              {table.getRowModel().rows.map((row) => (
+                <ContextMenu key={row.id}>
+                  <ContextMenuTrigger asChild>
+                    <TableRow
+                      data-state={row.getIsSelected() && "selected"}
+                      onClick={() => {
+                        const path =
+                          "./detail?id=" +
+                          encodeURIComponent(row.original.path);
+                        jump(path);
+                      }}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          className={
+                            // @ts-expect-error: td設定済み
+                            cell.column.columnDef.meta.td
+                          }
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuLabel>データ編集</ContextMenuLabel>
+                    <ContextMenuGroup>
+                      <div className="flex flex-col p-1">
+                        <Label className="text-xs text-gray-500">name</Label>
+                        <Input
+                          type="text"
+                          defaultValue={row.original.name}
+                          onChange={(e) => {
+                            modifier.set(row.id, "name", e.target.value);
+                          }}
+                        ></Input>
+                      </div>
+                      <div className="flex flex-col p-1">
+                        <Label className="text-xs text-gray-500">date</Label>
+                        <Calendar
+                          locale={ja}
+                          selected={new Date(row.original.date)}
+                          defaultMonth={
+                            new Date(row.original.date || Date.now())
+                          }
+                          onDayClick={(date) => {
+                            modifier.set(row.id, "date", date);
+                          }}
+                        />
+                      </div>
+                      <div className="flex flex-col p-1">
+                        <Label className="text-xs text-gray-500">tag</Label>
+                        <Input
+                          type="text"
+                          defaultValue={row.original.tag.join(" ")}
+                          onChange={(e) => {
+                            modifier.set(
+                              row.id,
+                              "tag",
+                              e.target.value.split(" ").filter((i) => i)
+                            );
+                          }}
+                        ></Input>
+                      </div>
+                    </ContextMenuGroup>
+                  </ContextMenuContent>
+                </ContextMenu>
+              ))}
+              {[...Array(rowSpan)].map((_, i) => (
+                <TableRow
+                  key={`blank_row_${i}`}
+                  className="border-transparent hover:bg-transparent"
+                >
+                  <TableCell
+                    colSpan={columns.length}
+                    className="box-content h-[1lh]"
+                  ></TableCell>
+                </TableRow>
+              ))}
+            </>
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
@@ -525,23 +545,58 @@ const IndexPage = () => {
           )}
         </TableBody>
       </Table>
-      <Pagination className="mt-4">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => {
-                table.previousPage();
-              }}
-              aria-disabled={currentPage <= minPage}
-              tabIndex={currentPage <= minPage ? -1 : undefined}
-              className={
-                currentPage <= minPage
-                  ? "pointer-events-none opacity-50"
-                  : undefined
-              }
-            />
-          </PaginationItem>
-          <PaginationItem>
+      <IndexPagination
+        table={table}
+        currentPage={currentPage}
+        minPage={minPage}
+        maxPage={maxPage}
+      />
+    </>
+  );
+};
+
+const IndexPagination = ({
+  table,
+  currentPage,
+  minPage,
+  maxPage,
+}: {
+  table: import("@tanstack/table-core").Table<TlogTableColumn>;
+  currentPage: number;
+  minPage: number;
+  maxPage: number;
+}) => {
+  if (maxPage < minPage) return null;
+  const centerStart = Math.max(minPage, currentPage - 2);
+  const centerEnd = Math.min(maxPage, currentPage + 2);
+  const centerCount = centerEnd - centerStart + 1;
+  const leftEllipsis = Math.max(
+    currentPage - 2 > minPage + 1 ? 1 : 0,
+    Math.min(5, maxPage - minPage - 3) - Math.max(0, maxPage - currentPage)
+  );
+  const rightEllipsis = Math.max(
+    currentPage + 2 < maxPage - 1 ? 1 : 0,
+    Math.min(5, maxPage - minPage - 3) - Math.max(0, currentPage - minPage)
+  );
+  return (
+    <Pagination className="mt-4">
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            onClick={() => {
+              table.previousPage();
+            }}
+            aria-disabled={currentPage <= minPage}
+            tabIndex={currentPage <= minPage ? -1 : undefined}
+            className={
+              currentPage <= minPage
+                ? "pointer-events-none opacity-50"
+                : undefined
+            }
+          />
+        </PaginationItem>
+        {currentPage - minPage > 2 && (
+          <PaginationItem key={`page_${minPage + 1}`}>
             <PaginationLink
               onClick={() => {
                 table.setPageIndex(minPage);
@@ -551,60 +606,61 @@ const IndexPage = () => {
               {minPage + 1}
             </PaginationLink>
           </PaginationItem>
-          {currentPage > minPage + 3 && (
-            <PaginationItem>
-              <PaginationEllipsis />
+        )}
+        {leftEllipsis > 0 &&
+          [...Array(leftEllipsis)].map((_, i) => (
+            <PaginationItem key={`page_left_ellipsis_${i}`}>
+              <PaginationEllipsis className="opacity-20" />
             </PaginationItem>
-          )}
-          {[...Array(5)]
-            .map((_, i) => i + currentPage - 2)
-            .filter((i) => i > minPage && i < maxPage)
-            .map((i) => (
-              <PaginationItem key={i}>
-                <PaginationLink
-                  onClick={() => {
-                    table.setPageIndex(i);
-                  }}
-                  isActive={i == currentPage}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-          {currentPage < maxPage - 3 && (
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-          )}
-          {minPage < maxPage && (
-            <PaginationItem>
+          ))}
+        {[...Array(centerCount)]
+          .map((_, i) => i + centerStart)
+          .map((i) => (
+            <PaginationItem key={`page_${i + 1}`}>
               <PaginationLink
                 onClick={() => {
-                  table.setPageIndex(maxPage);
+                  table.setPageIndex(i);
                 }}
-                isActive={currentPage == maxPage}
+                isActive={i == currentPage}
               >
-                {maxPage + 1}
+                {i + 1}
               </PaginationLink>
             </PaginationItem>
-          )}
-          <PaginationItem>
-            <PaginationNext
+          ))}
+        {rightEllipsis > 0 &&
+          [...Array(rightEllipsis)].map((_, i) => (
+            <PaginationItem key={`page_right_ellipsis_${i}`}>
+              <PaginationEllipsis className="opacity-20" />
+            </PaginationItem>
+          ))}
+        {maxPage - currentPage > 2 && (
+          <PaginationItem key={`page_${maxPage + 1}`}>
+            <PaginationLink
               onClick={() => {
-                table.nextPage();
+                table.setPageIndex(maxPage);
               }}
-              aria-disabled={currentPage >= maxPage}
-              tabIndex={currentPage >= maxPage ? -1 : undefined}
-              className={
-                currentPage >= maxPage
-                  ? "pointer-events-none opacity-50"
-                  : undefined
-              }
-            />
+              isActive={currentPage == maxPage}
+            >
+              {maxPage + 1}
+            </PaginationLink>
           </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    </>
+        )}
+        <PaginationItem>
+          <PaginationNext
+            onClick={() => {
+              table.nextPage();
+            }}
+            aria-disabled={currentPage >= maxPage}
+            tabIndex={currentPage >= maxPage ? -1 : undefined}
+            className={
+              currentPage >= maxPage
+                ? "pointer-events-none opacity-50"
+                : undefined
+            }
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   );
 };
 
