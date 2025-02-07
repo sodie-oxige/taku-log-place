@@ -6,8 +6,9 @@ declare global {
       windowClose: () => void;
       windowMaximize: () => void;
       windowMinimize: () => void;
-      logdirAdd: () => Promise<string[] | null>;
-      logdirGet: () => string[] | null;
+      logdirGet: () => string[];
+      logdirAdd: () => Promise<string[]>;
+      logdirDelete: (string) => string[];
       logfilesGet: () => TlogTableColumn[];
       logfileSet: (TlogTableColumn) => void;
       logdataGet: (string) => Tlogdata[];

@@ -57,6 +57,11 @@ ipcMain.handle("window-minimize", () => {
   mainWindow.minimize();
 });
 
+ipcMain.handle("logdir:get", () => {
+  const setting: Tsetting = JsonManage.get("setting");
+  return setting.logdir;
+});
+
 ipcMain.handle("logdir:add", async () => {
   const result = (await dialog.showOpenDialog({
     properties: ["openDirectory"],
@@ -71,15 +76,17 @@ ipcMain.handle("logdir:add", async () => {
   return setting.logdir;
 });
 
-ipcMain.handle("logdir:get", () => {
-  const setting: Tsetting = JsonManage.get("setting");
+ipcMain.handle("logdir:delete", (_event, deleteDir: string) => {
+  let setting: Tsetting = JsonManage.get("setting");
+  setting.logdir = setting.logdir.filter((d) => d != deleteDir);
+  JsonManage.update<Tsetting>("setting", setting);
   return setting.logdir;
 });
 
 ipcMain.handle("logfiles:get", () => {
-  const setting: Tsetting = JsonManage.get("setting");
+  const setting: Tsetting = JsonManage.getFresh("setting");
   const logfiles: string[] = setting.logdir
-    .map((d) => readDirSyncSub(d))
+    .map((d) => fs.readdirSync(d).map((f) => path.join(d, f)))
     .flat()
     .filter((p) => /\.html?$/.test(p));
   const res: TlogTableColumn[] = logfiles.map((l) => {
