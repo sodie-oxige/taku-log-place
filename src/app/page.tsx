@@ -40,7 +40,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/calendar";
 import { DateRange } from "react-day-picker";
 import {
   ContextMenu,
@@ -496,6 +496,7 @@ const IndexPage = () => {
                       <div className="flex flex-col p-1">
                         <Label className="text-xs text-gray-500">date</Label>
                         <Calendar
+                          className="py-2 border rounded-md shadow-sm"
                           locale={ja}
                           selected={new Date(row.original.date)}
                           defaultMonth={
