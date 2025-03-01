@@ -89,15 +89,15 @@ ipcMain.handle("logfiles:get", () => {
     .map((d) => fs.readdirSync(d).map((f) => path.join(d, f)))
     .flat()
     .filter((p) => /\.html?$/.test(p));
-  const res: TlogTableColumn[] = logfiles.map((l) => {
+  const res: TlogfileMetadata[] = logfiles.map((l) => {
     const dirPath = path.dirname(l);
     const fileName = path.basename(l);
     const jsonName = dirPath;
     const jsonPath = path.resolve(dirPath, "modifier.json");
     if (!JsonManage.isDefined(jsonName))
       JsonManage.init(jsonName, jsonPath, {});
-    const data: TlogTableColumn = (
-      JsonManage.get(jsonName) as Record<string, TlogTableColumn>
+    const data: TlogfileMetadata = (
+      JsonManage.get(jsonName) as Record<string, TlogfileMetadata>
     )[fileName];
     return {
       name: data?.name || fileName,
@@ -109,26 +109,48 @@ ipcMain.handle("logfiles:get", () => {
   return res;
 });
 
-ipcMain.handle("logfile:set", (_event, data: TlogTableColumn) => {
+ipcMain.handle("logfile:set", (_event, data: TlogfileMetadata) => {
   const dirPath = path.dirname(data.path);
   const fileaName = path.basename(data.path);
   const jsonName = dirPath;
   const jsonPath = path.resolve(dirPath, "modifier.json");
   if (!JsonManage.isDefined(jsonName)) JsonManage.init(jsonName, jsonPath, {});
-  let modifierJson: Record<string, TlogTableColumn> = JsonManage.get(jsonName);
+  let modifierJson: Record<string, TlogfileMetadata> = JsonManage.get(jsonName);
   modifierJson[fileaName] = data;
   JsonManage.update(jsonName, modifierJson);
 });
 
 ipcMain.handle("logdata:get", (_event, id: string) => {
-  const res: Tlogdata[] = [];
-  const defaultLogdata: Tlogdata = {
+  const setting: Tsetting = JsonManage.getFresh("setting");
+  const logfiles: string =
+    setting.logdir
+      .map((d) => fs.readdirSync(d).map((f) => path.join(d, f)))
+      .flat()
+      .find((p) => p == id) ?? id;
+  const dirPath = path.dirname(logfiles);
+  const fileName = path.basename(logfiles);
+  const jsonName = dirPath;
+  const jsonPath = path.resolve(dirPath, "modifier.json");
+  if (!JsonManage.isDefined(jsonName)) JsonManage.init(jsonName, jsonPath, {});
+  const data: TlogfileMetadata = (
+    JsonManage.get(jsonName) as Record<string, TlogfileMetadata>
+  )[fileName];
+  const res: TlogfileData = {
+    metadata: {
+      name: data?.name || fileName,
+      path: logfiles,
+      date: data?.date || 0,
+      tag: data?.tag || [],
+    },
+    colmuns: [],
+  };
+  const defaultLogdata: TlogcolumnData = {
     name: "",
     tab: "",
     content: "",
     color: "",
   };
-  let currentLogdata: Tlogdata = { ...defaultLogdata };
+  let currentLogdata: TlogcolumnData = { ...defaultLogdata };
   let isSpan = false;
   let spanIndex = 0;
 
@@ -164,7 +186,7 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
         currentLogdata.name = currentLogdata.name.trim();
         currentLogdata.tab = currentLogdata.tab.trim();
         currentLogdata.content = currentLogdata.content.trim();
-        res.push(currentLogdata);
+        res.colmuns.push(currentLogdata);
         spanIndex = 0;
       } else if (name === "span") {
         isSpan = false;
@@ -178,6 +200,62 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
   parser.end();
 
   return res;
+});
+
+ipcMain.handle("save-html", async (_event, name: string) => {
+  setTimeout(async () => {
+    if (mainWindow == null) return;
+    const cleanedHtml = await mainWindow.webContents.executeJavaScript(`
+      (async () => {
+        const clone = document.documentElement.cloneNode(true);
+        
+        // 不要なタグを削除
+        clone.querySelectorAll('script, link[rel="modulepreload"], link[rel="preload"]').forEach(el => el.remove());
+        clone.querySelectorAll('a').forEach(el => el.setAttribute("href","?"));
+
+        // CSSを埋め込み
+          Array.from(document.styleSheets).map(async (sheet) => {
+            try {
+              if (sheet.href) {
+                const response = await fetch(sheet.href);
+                return response.ok ? await response.text() : '';
+              } else {
+                return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\\n');
+              }
+            } catch (e) {
+              return '';
+            }
+          })
+
+        const styleSheets = await Promise.all(
+          Array.from(document.styleSheets).map(async (sheet) => {
+            try {
+              if (sheet.href) {
+                const response = await fetch(sheet.href);
+                return response.ok ? await response.text() : '';
+              } else {
+                return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\\n');
+              }
+            } catch (e) {
+              return '';
+            }
+          })
+        );
+
+        const styleTag = document.createElement('style');
+        styleTag.textContent = styleSheets.join('\\n');
+        clone.querySelector('head').appendChild(styleTag);
+
+        return clone.outerHTML;
+      })();
+    `);
+    const filePath = path.join(
+      app.getPath("userData"),
+      "logfile",
+      `${name}.html`
+    );
+    fs.writeFileSync(filePath, cleanedHtml, "utf-8");
+  }, 500);
 });
 
 const readDirSyncSub = (dir: string): string[] => {

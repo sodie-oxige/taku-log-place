@@ -6,12 +6,13 @@ declare global {
       windowClose: () => void;
       windowMaximize: () => void;
       windowMinimize: () => void;
+      saveHtml: (string) => void;
       logdirGet: () => string[];
       logdirAdd: () => Promise<string[]>;
       logdirDelete: (string) => string[];
-      logfilesGet: () => TlogTableColumn[];
+      logfilesGet: () => TlogfileMetadata[];
       logfileSet: (TlogTableColumn) => void;
-      logdataGet: (string) => Tlogdata[];
+      logdataGet: (string) => TlogfileData;
     };
   }
 
@@ -19,14 +20,19 @@ declare global {
     logdir: string[];
   }
 
-  interface TlogTableColumn {
+  interface TlogfileMetadata {
     name: string;
     path: string;
     date: number;
     tag: string[];
   }
 
-  interface Tlogdata {
+  interface TlogfileData {
+    metadata: TlogfileMetadata;
+    colmuns: TlogcolumnData[];
+  }
+
+  interface TlogcolumnData {
     name: string;
     tab: string;
     content: string;
