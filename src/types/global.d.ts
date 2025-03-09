@@ -6,12 +6,19 @@ declare global {
       windowClose: () => void;
       windowMaximize: () => void;
       windowMinimize: () => void;
+      // 監視ディレクトリ一覧操作
       logdirGet: () => string[];
       logdirAdd: () => Promise<string[]>;
       logdirDelete: (string) => string[];
+      // ログファイル一覧操作
       logfilesGet: () => TlogfileMetadata[];
       logfileSet: (TlogTableColumn) => void;
+      // ログファイル操作
       logdataGet: (string) => TlogfileData;
+      logdataSet: (
+        string,
+        { name: string, tabtype: number, color: string }
+      ) => void;
     };
   }
 

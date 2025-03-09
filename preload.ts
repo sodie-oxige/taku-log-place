@@ -8,6 +8,9 @@ contextBridge.exposeInMainWorld("electron", {
   logdirAdd: async () => ipcRenderer.invoke("logdir:add"),
   logdirDelete: (dir: string) => ipcRenderer.invoke("logdir:delete", dir),
   logfilesGet: () => ipcRenderer.invoke("logfiles:get"),
-  logfileSet: (data: TlogfileMetadata) => ipcRenderer.invoke("logfile:set", data),
+  logfileSet: (data: TlogfileMetadata) =>
+    ipcRenderer.invoke("logfile:set", data),
   logdataGet: (id: string) => ipcRenderer.invoke("logdata:get", id),
+  logdataSet: (id: string, data: TlogfileData) =>
+    ipcRenderer.invoke("logdata:set", id, data),
 });

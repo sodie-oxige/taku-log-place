@@ -197,7 +197,7 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
         currentLogdata.content = currentLogdata.content.trim();
         res.colmuns.push(currentLogdata);
         if (
-          ["main", "other", "info"].includes(currentLogdata.tab) &&
+          !["main", "other", "info"].includes(currentLogdata.tab) &&
           !(currentLogdata.tab in res.tabs)
         ) {
           res.tabs[currentLogdata.tab] = {
@@ -218,6 +218,29 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
 
   return res;
 });
+
+ipcMain.handle(
+  "logdata:set",
+  (
+    _event,
+    id: string,
+    data: { name: string; tabtype: number; color: string }
+  ) => {
+    const filepath = decodeURIComponent(id);
+    const _temp = filepath.split("\\");
+    const fileName = _temp.pop();
+    const dirPath = _temp.join("\\");
+    const jsonPath = path.resolve(dirPath, "modifier.json");
+
+    if(!fileName) return;
+    if (!JsonManage.isDefined(dirPath)) JsonManage.init(dirPath, jsonPath, {});
+    const json = JsonManage.get(dirPath) as Record<string, TlogfileMetadata>;
+    // ここでデータの修正
+    JsonManage.update(dirPath,json)
+
+    return;
+  }
+);
 
 const readDirSyncSub = (dir: string): string[] => {
   let res: (string | string[])[] = fs

@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { ChevronRight } from "lucide-react";
 
 const logfileDataDefault: TlogfileData = {
   tabs: {},
@@ -42,19 +43,67 @@ const DetailPageComponent = () => {
     })();
   }, [searchParams]);
 
+  const Tabselect = ({
+    name,
+    value: v,
+  }: {
+    name: string;
+    value: { tabtype: number; tabcolor?: string };
+  }) => {
+    const [tabtype, settabtype] = useState<number>(v.tabtype);
+
+    const onValueChange = (index: string) => {
+      settabtype(Number(index));
+      const data = {
+        name: name,
+        tabtype: Number(index),
+        color: false,
+      };
+      window.electron.logdataSet(id, data);
+    };
+
+    return (
+      <>
+        <Label>{name}</Label>
+        <span className="flex">
+          <Select value={tabtype.toString()} onValueChange={onValueChange}>
+            <SelectTrigger className="flex-1 w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Tabtypes.map((v, i) => {
+                return (
+                  <SelectItem value={i.toString()} key={`${name}_${i}`}>
+                    {v}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+          {v.tabtype == 5 && <span>c</span>}
+        </span>
+      </>
+    );
+  };
+
   return (
     <div>
       <Sheet>
-        <SheetTrigger className="fixed t-0 r-0" asChild>
-          <Button>a</Button>
+        <SheetTrigger className="fixed bottom-2 right-2" asChild>
+          <Button variant="outline" size="icon">
+            <ChevronRight />
+          </Button>
         </SheetTrigger>
         <SheetContent>
           <SheetHeader>
             <SheetTitle>タブ設定</SheetTitle>
             <SheetDescription>
-              {Object.entries(logdata.tabs).map(([k, v]) => {
-                return <Tabselect name={k} value={v} key={`tabselect_${k}`} />;
-              })}
+              {!!logdata.tabs &&
+                Object.entries(logdata.tabs).map(([k, v]) => {
+                  return (
+                    <Tabselect name={k} value={v} key={`tabselect_${k}`} />
+                  );
+                })}
             </SheetDescription>
           </SheetHeader>
         </SheetContent>
@@ -77,37 +126,6 @@ const DetailPageComponent = () => {
             </Fragment>
           ))}
     </div>
-  );
-};
-
-const Tabselect = ({
-  name,
-  value: v,
-}: {
-  name: string;
-  value: { tabtype: number; tabcolor?: string };
-}) => {
-  const [tabtype, settabtype] = useState<number>(v.tabtype);
-  console.log(tabtype.toString());
-
-  return (
-    <>
-      <Label>{name}</Label>
-      <Select value={tabtype.toString()}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {Tabtypes.map((v, i) => {
-            return (
-              <SelectItem value={i.toString()} key={`${name}_${i}`}>
-                {v}
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
-    </>
   );
 };
 
