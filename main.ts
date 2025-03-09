@@ -7,6 +7,24 @@ import { Parser } from "htmlparser2";
 let defaultSetting: Tsetting = {
   logdir: [],
 };
+function defaultTabtype(tab: string): number {
+  switch (tab) {
+    case "main":
+      return 1;
+    case "メイン":
+      return 1;
+    case "other":
+      return 2;
+    case "雑談":
+      return 2;
+    case "info":
+      return 3;
+    case "情報":
+      return 3;
+    default:
+      return 0;
+  }
+}
 
 let mainWindow: BrowserWindow | null;
 
@@ -89,15 +107,15 @@ ipcMain.handle("logfiles:get", () => {
     .map((d) => fs.readdirSync(d).map((f) => path.join(d, f)))
     .flat()
     .filter((p) => /\.html?$/.test(p));
-  const res: TlogTableColumn[] = logfiles.map((l) => {
+  const res: TlogfileMetadata[] = logfiles.map((l) => {
     const dirPath = path.dirname(l);
     const fileName = path.basename(l);
     const jsonName = dirPath;
     const jsonPath = path.resolve(dirPath, "modifier.json");
     if (!JsonManage.isDefined(jsonName))
       JsonManage.init(jsonName, jsonPath, {});
-    const data: TlogTableColumn = (
-      JsonManage.get(jsonName) as Record<string, TlogTableColumn>
+    const data: TlogfileMetadata = (
+      JsonManage.get(jsonName) as Record<string, TlogfileMetadata>
     )[fileName];
     return {
       name: data?.name || fileName,
@@ -109,26 +127,39 @@ ipcMain.handle("logfiles:get", () => {
   return res;
 });
 
-ipcMain.handle("logfile:set", (_event, data: TlogTableColumn) => {
+ipcMain.handle("logfile:set", (_event, data: TlogfileMetadata) => {
   const dirPath = path.dirname(data.path);
   const fileaName = path.basename(data.path);
   const jsonName = dirPath;
   const jsonPath = path.resolve(dirPath, "modifier.json");
   if (!JsonManage.isDefined(jsonName)) JsonManage.init(jsonName, jsonPath, {});
-  let modifierJson: Record<string, TlogTableColumn> = JsonManage.get(jsonName);
+  let modifierJson: Record<string, TlogfileMetadata> = JsonManage.get(jsonName);
   modifierJson[fileaName] = data;
   JsonManage.update(jsonName, modifierJson);
 });
 
 ipcMain.handle("logdata:get", (_event, id: string) => {
-  const res: Tlogdata[] = [];
-  const defaultLogdata: Tlogdata = {
+  const res: TlogfileData = {
+    tabs: {
+      メイン: {
+        tabtype: 1,
+      },
+      雑談: {
+        tabtype: 2,
+      },
+      情報: {
+        tabtype: 3,
+      },
+    },
+    colmuns: [],
+  };
+  const defaultLogdata: TlogcolumnData = {
     name: "",
     tab: "",
     content: "",
     color: "",
   };
-  let currentLogdata: Tlogdata = { ...defaultLogdata };
+  let currentLogdata: TlogcolumnData = { ...defaultLogdata };
   let isSpan = false;
   let spanIndex = 0;
 
@@ -164,7 +195,15 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
         currentLogdata.name = currentLogdata.name.trim();
         currentLogdata.tab = currentLogdata.tab.trim();
         currentLogdata.content = currentLogdata.content.trim();
-        res.push(currentLogdata);
+        res.colmuns.push(currentLogdata);
+        if (
+          ["main", "other", "info"].includes(currentLogdata.tab) &&
+          !(currentLogdata.tab in res.tabs)
+        ) {
+          res.tabs[currentLogdata.tab] = {
+            tabtype: defaultTabtype(currentLogdata.tab),
+          };
+        }
         spanIndex = 0;
       } else if (name === "span") {
         isSpan = false;
