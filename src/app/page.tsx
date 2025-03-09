@@ -224,6 +224,7 @@ const IndexPage = () => {
       path: "",
       date: 0,
       tag: [],
+      tabs: {}
     },
     set: (id, type, data) => {
       const row = table.getRow(id);

@@ -38,6 +38,7 @@ const DetailPageComponent = () => {
   useEffect(() => {
     (async () => {
       const res = await window.electron.logdataGet(id);
+      console.log(res);
       setLogdata(res);
       isLogdataLoaded.current = true;
     })();
@@ -65,7 +66,7 @@ const DetailPageComponent = () => {
     return (
       <>
         <Label>{name}</Label>
-        <span className="flex">
+        <span className="flex mb-2">
           <Select value={tabtype.toString()} onValueChange={onValueChange}>
             <SelectTrigger className="flex-1 w-[180px]">
               <SelectValue />
@@ -86,10 +87,28 @@ const DetailPageComponent = () => {
     );
   };
 
+  const Statement = ({ statement }: { statement: TlogcolumnData }) => {
+    if (statement.name == "system")
+      return <SystemStatement statement={statement} />;
+    //todo
+    switch (logdata.tabs[statement.tab]?.tabtype) {
+      case 0:
+        return <AnotherStatement statement={statement} />;
+      case 1:
+        return <MainStatement statement={statement} />;
+      case 2:
+        return <OtherStatement statement={statement} />;
+      case 3:
+        return <InfoStatement statement={statement} />;
+      default:
+        return <AnotherStatement statement={statement} />;
+    }
+  };
+
   return (
     <div>
       <Sheet>
-        <SheetTrigger className="fixed bottom-2 right-2" asChild>
+        <SheetTrigger className="fixed top-14 right-2" asChild>
           <Button variant="outline" size="icon">
             <ChevronRight />
           </Button>
@@ -99,11 +118,17 @@ const DetailPageComponent = () => {
             <SheetTitle>タブ設定</SheetTitle>
             <SheetDescription>
               {!!logdata.tabs &&
-                Object.entries(logdata.tabs).map(([k, v]) => {
-                  return (
-                    <Tabselect name={k} value={v} key={`tabselect_${k}`} />
-                  );
-                })}
+                Object.entries(logdata.tabs)
+                  .sort(([ak, _av], [bk, _bv]) => {
+                    const a = (ak=="main"||ak=="メイン")?3:(ak=="other"||ak=="雑談")?2:(ak=="info"||ak=="情報")?1:0;
+                    const b = (bk=="main"||bk=="メイン")?3:(bk=="other"||bk=="雑談")?2:(bk=="info"||bk=="情報")?1:0;
+                    return b - a;
+                  })
+                  .map(([k, v]) => {
+                    return (
+                      <Tabselect name={k} value={v} key={`tabselect_${k}`} />
+                    );
+                  })}
             </SheetDescription>
           </SheetHeader>
         </SheetContent>
@@ -127,27 +152,6 @@ const DetailPageComponent = () => {
           ))}
     </div>
   );
-};
-
-const Statement = ({ statement }: { statement: TlogcolumnData }) => {
-  if (statement.name == "system")
-    return <SystemStatement statement={statement} />;
-  switch (statement.tab) {
-    case "main":
-      return <MainStatement statement={statement} />;
-    case "メイン":
-      return <MainStatement statement={statement} />;
-    case "other":
-      return <OtherStatement statement={statement} />;
-    case "雑談":
-      return <OtherStatement statement={statement} />;
-    case "info":
-      return <InfoStatement statement={statement} />;
-    case "情報":
-      return <InfoStatement statement={statement} />;
-    default:
-      return <AnotherStatement statement={statement} />;
-  }
 };
 
 const MainStatement = ({ statement }: { statement: TlogcolumnData }) => {

@@ -29,13 +29,7 @@ declare global {
 
   // htmlファイル毎の設定（Record<path,TlogfileSetting>でフォルダごとに保存）
   interface TlogfileSetting {
-    tabs: Record<
-      string,
-      {
-        tabtype: number;
-        tabcolor?: string;
-      }[]
-    >;
+    ver: [number, number, number];
     cols: Record<string, TlogfileMetadata>;
   }
 
@@ -45,6 +39,13 @@ declare global {
     path: string;
     date: number;
     tag: string[];
+    tabs: Record<
+      string,
+      {
+        tabtype: number;
+        tabcolor?: string;
+      }
+    >;
   }
 
   // 閲覧ファイル読み込みデータ
