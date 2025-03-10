@@ -253,8 +253,10 @@ ipcMain.handle(
     if (!json.cols[fileName].tabs[data.name])
       json.cols[fileName].tabs[data.name] = {
         tabtype: 0,
+        tabcolor: "#ffcbcb",
       };
     json.cols[fileName].tabs[data.name].tabtype = data.tabtype;
+    if (data.color) json.cols[fileName].tabs[data.name].tabcolor = data.color;
     JsonManage.update(dirPath, json);
     return;
   }
