@@ -54,44 +54,44 @@ const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
           <Button
             variant={"outline"}
             className="p-0 w-9 aspect-square"
-            onClick={() => onClickButton({ h: 0, s: 100, l: 90 })}
+            onClick={() => onClickButton({ h: 0, s: 100, l: 98 })}
           >
-            <div className="w-full h-full bg-[#ffcbcb]"></div>
+            <div className="w-full h-full bg-[#fff3f3]"></div>
           </Button>
           <Button
             variant={"outline"}
             className="p-0 w-9 aspect-square"
-            onClick={() => onClickButton({ h: 60, s: 59, l: 74 })}
+            onClick={() => onClickButton({ h: 60, s: 59, l: 95 })}
           >
-            <div className="w-full h-full bg-[#e4e495]"></div>
+            <div className="w-full h-full bg-[#fafaea]"></div>
           </Button>
           <Button
             variant={"outline"}
             className="p-0 w-9 aspect-square"
-            onClick={() => onClickButton({ h: 120, s: 66, l: 83 })}
+            onClick={() => onClickButton({ h: 120, s: 69, l: 97 })}
           >
-            <div className="w-full h-full bg-[#b5f0b5]"></div>
+            <div className="w-full h-full bg-[#f0fcf0]"></div>
           </Button>
           <Button
             variant={"outline"}
             className="p-0 w-9 aspect-square"
-            onClick={() => onClickButton({ h: 180, s: 82, l: 74 })}
+            onClick={() => onClickButton({ h: 180, s: 83, l: 95 })}
           >
-            <div className="w-full h-full bg-[#87f3f3]"></div>
+            <div className="w-full h-full bg-[#eafdfd]"></div>
           </Button>
           <Button
             variant={"outline"}
             className="p-0 w-9 aspect-square"
-            onClick={() => onClickButton({ h: 240, s: 100, l: 92 })}
+            onClick={() => onClickButton({ h: 240, s: 100, l: 98 })}
           >
-            <div className="w-full h-full bg-[#d8d8ff]"></div>
+            <div className="w-full h-full bg-[#f7f7ff]"></div>
           </Button>
           <Button
             variant={"outline"}
             className="p-0 w-9 aspect-square"
-            onClick={() => onClickButton({ h: 300, s: 100, l: 89 })}
+            onClick={() => onClickButton({ h: 300, s: 100, l: 98 })}
           >
-            <div className="w-full h-full bg-[#ffc7ff]"></div>
+            <div className="w-full h-full bg-[#ffe4ff]"></div>
           </Button>
         </div>
         <div

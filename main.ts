@@ -249,11 +249,19 @@ ipcMain.handle(
         cols: {},
       } as TlogfileSetting);
     const json = getModifier(JsonManage.get(dirPath));
+    if (!json.cols[fileName])
+      json.cols[fileName] = {
+        name: fileName,
+        path: filepath,
+        date: 0,
+        tag: [],
+        tabs: {},
+      };
     if (!json.cols[fileName].tabs) json.cols[fileName].tabs = {};
     if (!json.cols[fileName].tabs[data.name])
       json.cols[fileName].tabs[data.name] = {
         tabtype: 0,
-        tabcolor: "#ffcbcb",
+        tabcolor: "#fff3f3",
       };
     json.cols[fileName].tabs[data.name].tabtype = data.tabtype;
     if (data.color) json.cols[fileName].tabs[data.name].tabcolor = data.color;

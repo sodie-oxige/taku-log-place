@@ -28,7 +28,7 @@ const logfileDataDefault: TlogfileData = {
   tabs: {},
   colmuns: [],
 };
-const Tabtypes = ["その他", "メイン", "雑談", "情報", "システム", "カラー"];
+const Tabtypes = ["その他", "メイン", "雑談", "情報", "カラー"];
 
 const DetailPageComponent = () => {
   const [logdata, setLogdata] = useState<TlogfileData>(logfileDataDefault);
@@ -89,7 +89,7 @@ const DetailPageComponent = () => {
               })}
             </SelectContent>
           </Select>
-          {v.tabtype == 5 && (
+          {tabtype == 4 && (
             <ColorPicker
               onChange={onColorChange}
               value={
@@ -116,6 +116,13 @@ const DetailPageComponent = () => {
         return <OtherStatement statement={statement} />;
       case 3:
         return <InfoStatement statement={statement} />;
+      case 4:
+        return (
+          <ColorStatement
+            statement={statement}
+            bg={logdata.tabs[statement.tab]?.tabcolor ?? "#fff3f3"}
+          />
+        );
       default:
         return <AnotherStatement statement={statement} />;
     }
@@ -214,6 +221,36 @@ const OtherStatement = ({ statement }: { statement: TlogcolumnData }) => {
       style={
         {
           "--c": statement.color,
+        } as React.CSSProperties
+      }
+    >
+      <span className="text-xs font-bold">{statement.name}</span>
+      <p className="text-xs">
+        {statement.content.split("\n").map((line, index) => (
+          <Fragment key={index}>
+            {line}
+            <br />
+          </Fragment>
+        ))}
+      </p>
+    </div>
+  );
+};
+
+const ColorStatement = ({
+  statement,
+  bg,
+}: {
+  statement: TlogcolumnData;
+  bg: string;
+}) => {
+  return (
+    <div
+      className="ml-6 flex flex-col p-2.5 text-[var(--c)]"
+      style={
+        {
+          "--c": statement.color,
+          backgroundColor: bg,
         } as React.CSSProperties
       }
     >
