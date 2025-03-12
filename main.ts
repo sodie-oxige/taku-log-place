@@ -158,7 +158,13 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
     } as TlogfileSetting);
   let modifierJson: TlogfileSetting = getModifier(JsonManage.get(dirPath));
   const res: TlogfileData = {
-    tabs: {},
+    metadata: {
+      name: modifierJson.cols?.[fileName].name || fileName,
+      path: id,
+      date: modifierJson.cols?.[fileName].date || 0,
+      tag: modifierJson.cols?.[fileName].tag || [],
+      tabs: modifierJson.cols?.[fileName].tabs || {},
+    },
     colmuns: [],
   };
   const defaultLogdata: TlogcolumnData = {
@@ -204,8 +210,8 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
         currentLogdata.tab = currentLogdata.tab.trim();
         currentLogdata.content = currentLogdata.content.trim();
         res.colmuns.push(currentLogdata);
-        if (!(currentLogdata.tab in res.tabs)) {
-          res.tabs[currentLogdata.tab] = {
+        if (!(currentLogdata.tab in res.metadata.tabs)) {
+          res.metadata.tabs[currentLogdata.tab] = {
             tabtype:
               modifierJson?.cols?.[fileName]?.tabs?.[currentLogdata.tab]
                 ?.tabtype ?? defaultTabtype(currentLogdata.tab),
@@ -270,6 +276,62 @@ ipcMain.handle(
   }
 );
 
+ipcMain.handle("save-html", async (_event, name: string) => {
+  setTimeout(async () => {
+    if (mainWindow == null) return;
+    const cleanedHtml = await mainWindow.webContents.executeJavaScript(`
+      (async () => {
+        const clone = document.documentElement.cloneNode(true);
+        
+        // 不要なタグを削除
+        clone.querySelectorAll('script, link[rel="modulepreload"], link[rel="preload"]').forEach(el => el.remove());
+        clone.querySelectorAll('a').forEach(el => el.setAttribute("href","?"));
+
+        // CSSを埋め込み
+          Array.from(document.styleSheets).map(async (sheet) => {
+            try {
+              if (sheet.href) {
+                const response = await fetch(sheet.href);
+                return response.ok ? await response.text() : '';
+              } else {
+                return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\\n');
+              }
+            } catch (e) {
+              return '';
+            }
+          })
+
+        const styleSheets = await Promise.all(
+          Array.from(document.styleSheets).map(async (sheet) => {
+            try {
+              if (sheet.href) {
+                const response = await fetch(sheet.href);
+                return response.ok ? await response.text() : '';
+              } else {
+                return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\\n');
+              }
+            } catch (e) {
+              return '';
+            }
+          })
+        );
+
+        const styleTag = document.createElement('style');
+        styleTag.textContent = styleSheets.join('\\n');
+        clone.querySelector('head').appendChild(styleTag);
+
+        return clone.outerHTML;
+      })();
+    `);
+    const filePath = path.join(
+      app.getPath("userData"),
+      "logfile",
+      `${name}.html`
+    );
+    fs.writeFileSync(filePath, cleanedHtml, "utf-8");
+  }, 500);
+});
+
 const compareVersion = (
   version: [number, number, number],
   sourceVersion: [number, number, number]
@@ -294,4 +356,4 @@ const getModifier = (data: any): TlogfileSetting => {
   }
   res.ver = version;
   return res;
-};
+}

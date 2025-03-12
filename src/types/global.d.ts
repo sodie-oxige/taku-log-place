@@ -6,6 +6,7 @@ declare global {
       windowClose: () => void;
       windowMaximize: () => void;
       windowMinimize: () => void;
+      saveHtml: (string) => void;
       // 監視ディレクトリ一覧操作
       logdirGet: () => string[];
       logdirAdd: () => Promise<string[]>;
@@ -50,13 +51,7 @@ declare global {
 
   // 閲覧ファイル読み込みデータ
   interface TlogfileData {
-    tabs: Record<
-      string,
-      {
-        tabtype: number;
-        tabcolor?: string;
-      }
-    >;
+    metadata: TlogfileMetadata;
     colmuns: TlogcolumnData[];
   }
 

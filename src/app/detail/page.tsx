@@ -31,18 +31,24 @@ import { ChevronRight } from "lucide-react";
 import { ColorPicker } from "@/components/colorpicker";
 import { ColorUtils } from "@root/module/color_utils";
 
-const logfileDataDefault: TlogfileData = {
-  tabs: {},
-  colmuns: [],
-};
 const Tabtypes = ["その他", "メイン", "雑談", "情報", "カラー"];
 
+const logfileDataDefault: TlogfileData = {
+  metadata: {
+    name: "",
+    path: "",
+    date: 0,
+    tag: [],
+    tabs: {}
+  },
+  colmuns: [],
+};
 const DetailPageComponent = () => {
   const [colSetting, setColSetting] = useState<TlogfileData["colmuns"]>(
     logfileDataDefault["colmuns"]
   );
-  const [tabSetting, setTabSetting] = useState<TlogfileData["tabs"]>(
-    logfileDataDefault["tabs"]
+  const [tabSetting, setTabSetting] = useState<TlogfileData["metadata"]["tabs"]>(
+    logfileDataDefault["metadata"]["tabs"]
   );
   const isLogdataLoaded = useRef(false); // logdataのロードが完了したかのフラグ
   const searchParams = useSearchParams();
@@ -52,8 +58,10 @@ const DetailPageComponent = () => {
     (async () => {
       const res = await window.electron.logdataGet(id);
       setColSetting(res.colmuns);
-      setTabSetting(res.tabs);
+      setTabSetting(res.metadata.tabs);
       isLogdataLoaded.current = true;
+      console.log(res.metadata.name);
+      window.electron.saveHtml(res.metadata.name);
     })();
   }, [searchParams]);
 

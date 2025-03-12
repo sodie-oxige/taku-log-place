@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld("electron", {
   windowClose: () => ipcRenderer.invoke("window-close"),
   windowMaximize: () => ipcRenderer.invoke("window-maximize"),
   windowMinimize: () => ipcRenderer.invoke("window-minimize"),
+  saveHtml: (name: string) => ipcRenderer.invoke("save-html", name),
   logdirGet: () => ipcRenderer.invoke("logdir:get"),
   logdirAdd: async () => ipcRenderer.invoke("logdir:add"),
   logdirDelete: (dir: string) => ipcRenderer.invoke("logdir:delete", dir),
