@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Header from "./header";
 import { ScrollArea } from "@/components/ui/scroll-area";

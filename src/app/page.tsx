@@ -62,7 +62,7 @@ import { ja } from "date-fns/locale/ja";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-const columns: ColumnDef<TlogTableColumn>[] = [
+const columns: ColumnDef<TlogfileMetadata>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -150,7 +150,7 @@ const columns: ColumnDef<TlogTableColumn>[] = [
 ];
 
 const IndexPage = () => {
-  const [logfile, setlogfile] = useState<TlogTableColumn[]>([]);
+  const [logfile, setlogfile] = useState<TlogfileMetadata[]>([]);
   const isLogfileLoaded = useRef(false); // logfileのロードが完了したかのフラグ
   const [sorting, setSorting] = useState<SortingState>([
     { id: "date", desc: true },
@@ -215,7 +215,7 @@ const IndexPage = () => {
   taglist = taglist.filter((e, i, a) => !(i && a[i - 1].label == e.label));
 
   interface TmodifierData {
-    data: TlogTableColumn;
+    data: TlogfileMetadata;
     set: (path: string, type: "name" | "date" | "tag", data: unknown) => void;
   }
   const modifier: TmodifierData = {
@@ -224,6 +224,7 @@ const IndexPage = () => {
       path: "",
       date: 0,
       tag: [],
+      tabs: {}
     },
     set: (id, type, data) => {
       const row = table.getRow(id);
@@ -562,7 +563,7 @@ const IndexPagination = ({
   minPage,
   maxPage,
 }: {
-  table: import("@tanstack/table-core").Table<TlogTableColumn>;
+  table: import("@tanstack/table-core").Table<TlogfileMetadata>;
   currentPage: number;
   minPage: number;
   maxPage: number;
