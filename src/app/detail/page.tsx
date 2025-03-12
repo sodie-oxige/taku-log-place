@@ -1,7 +1,14 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import { Fragment, Suspense, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -31,7 +38,12 @@ const logfileDataDefault: TlogfileData = {
 const Tabtypes = ["その他", "メイン", "雑談", "情報", "カラー"];
 
 const DetailPageComponent = () => {
-  const [logdata, setLogdata] = useState<TlogfileData>(logfileDataDefault);
+  const [colSetting, setColSetting] = useState<TlogfileData["colmuns"]>(
+    logfileDataDefault["colmuns"]
+  );
+  const [tabSetting, setTabSetting] = useState<TlogfileData["tabs"]>(
+    logfileDataDefault["tabs"]
+  );
   const isLogdataLoaded = useRef(false); // logdataのロードが完了したかのフラグ
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -39,7 +51,8 @@ const DetailPageComponent = () => {
   useEffect(() => {
     (async () => {
       const res = await window.electron.logdataGet(id);
-      setLogdata(res);
+      setColSetting(res.colmuns);
+      setTabSetting(res.tabs);
       isLogdataLoaded.current = true;
     })();
   }, [searchParams]);
@@ -53,8 +66,29 @@ const DetailPageComponent = () => {
   }) => {
     const [tabtype, settabtype] = useState<number>(v.tabtype);
 
+    const updateTabSetting = (
+      name: string,
+      data: { tabtype: number; tabcolor?: string }
+    ) => {
+      const tabcolor = data.tabcolor ?? "fff3f3";
+      if (
+        !!tabSetting[name] &&
+        tabSetting[name].tabtype == data.tabtype &&
+        tabSetting[name].tabcolor == tabcolor
+      )
+        return;
+      const newTabSetting = { ...tabSetting };
+      newTabSetting[name] = {
+        tabtype: data.tabtype,
+        tabcolor: tabcolor,
+      };
+      setTabSetting(newTabSetting);
+    };
     const onValueChange = (index: string) => {
       settabtype(Number(index));
+      updateTabSetting(name, {
+        tabtype: Number(index),
+      });
       const data = {
         name: name,
         tabtype: Number(index),
@@ -63,6 +97,10 @@ const DetailPageComponent = () => {
       window.electron.logdataSet(id, data);
     };
     const onColorChange = (c: { h: number; s: number; l: number }) => {
+      updateTabSetting(name, {
+        tabtype: tabtype,
+        tabcolor: ColorUtils.hsl2code(c),
+      });
       const data = {
         name: name,
         tabtype: tabtype,
@@ -107,7 +145,7 @@ const DetailPageComponent = () => {
   const Statement = ({ statement }: { statement: TlogcolumnData }) => {
     if (statement.name == "system")
       return <SystemStatement statement={statement} />;
-    switch (logdata.tabs[statement.tab]?.tabtype) {
+    switch (tabSetting[statement.tab]?.tabtype) {
       case 0:
         return <AnotherStatement statement={statement} />;
       case 1:
@@ -120,13 +158,37 @@ const DetailPageComponent = () => {
         return (
           <ColorStatement
             statement={statement}
-            bg={logdata.tabs[statement.tab]?.tabcolor ?? "#fff3f3"}
+            bg={tabSetting[statement.tab]?.tabcolor ?? "#fff3f3"}
           />
         );
       default:
         return <AnotherStatement statement={statement} />;
     }
   };
+
+  const sortedTabs = useMemo(
+    () =>
+      Object.entries(tabSetting).sort(([ak, _av], [bk, _bv]) => {
+        const a =
+          ak == "main" || ak == "メイン"
+            ? 3
+            : ak == "other" || ak == "雑談"
+            ? 2
+            : ak == "info" || ak == "情報"
+            ? 1
+            : 0;
+        const b =
+          bk == "main" || bk == "メイン"
+            ? 3
+            : bk == "other" || bk == "雑談"
+            ? 2
+            : bk == "info" || bk == "情報"
+            ? 1
+            : 0;
+        return b - a;
+      }),
+    [tabSetting]
+  );
 
   return (
     <div>
@@ -139,32 +201,10 @@ const DetailPageComponent = () => {
         <SheetContent>
           <SheetHeader>
             <SheetTitle>タブ設定</SheetTitle>
-            {!!logdata.tabs &&
-              Object.entries(logdata.tabs)
-                .sort(([ak, _av], [bk, _bv]) => {
-                  const a =
-                    ak == "main" || ak == "メイン"
-                      ? 3
-                      : ak == "other" || ak == "雑談"
-                      ? 2
-                      : ak == "info" || ak == "情報"
-                      ? 1
-                      : 0;
-                  const b =
-                    bk == "main" || bk == "メイン"
-                      ? 3
-                      : bk == "other" || bk == "雑談"
-                      ? 2
-                      : bk == "info" || bk == "情報"
-                      ? 1
-                      : 0;
-                  return b - a;
-                })
-                .map(([k, v]) => {
-                  return (
-                    <Tabselect name={k} value={v} key={`tabselect_${k}`} />
-                  );
-                })}
+            {!!tabSetting &&
+              sortedTabs.map(([k, v]) => {
+                return <Tabselect name={k} value={v} key={`tabselect_${k}`} />;
+              })}
           </SheetHeader>
         </SheetContent>
       </Sheet>
@@ -179,7 +219,7 @@ const DetailPageComponent = () => {
               <Separator />
             </Fragment>
           ))
-        : logdata.colmuns.map((l, i) => (
+        : colSetting.map((l, i) => (
             <Fragment key={i}>
               <Statement statement={l} />
               <Separator />
