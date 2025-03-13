@@ -39,7 +39,7 @@ const logfileDataDefault: TlogfileData = {
     path: "",
     date: 0,
     tag: [],
-    tabs: {}
+    tabs: {},
   },
   colmuns: [],
 };
@@ -47,12 +47,14 @@ const DetailPageComponent = () => {
   const [colSetting, setColSetting] = useState<TlogfileData["colmuns"]>(
     logfileDataDefault["colmuns"]
   );
-  const [tabSetting, setTabSetting] = useState<TlogfileData["metadata"]["tabs"]>(
-    logfileDataDefault["metadata"]["tabs"]
-  );
+  const [tabSetting, setTabSetting] = useState<
+    TlogfileData["metadata"]["tabs"]
+  >(logfileDataDefault["metadata"]["tabs"]);
   const isLogdataLoaded = useRef(false); // logdataのロードが完了したかのフラグ
+  const deffTabSetting = useRef<TlogfileData["metadata"]["tabs"]>({}); // tabSettingの変更箇所
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
+  const pageName = useRef("");
 
   useEffect(() => {
     (async () => {
@@ -60,8 +62,8 @@ const DetailPageComponent = () => {
       setColSetting(res.colmuns);
       setTabSetting(res.metadata.tabs);
       isLogdataLoaded.current = true;
-      console.log(res.metadata.name);
-      window.electron.saveHtml(res.metadata.name);
+      pageName.current = res.metadata.name;
+      window.electron.saveHtml(pageName.current);
     })();
   }, [searchParams]);
 
@@ -73,30 +75,12 @@ const DetailPageComponent = () => {
     value: { tabtype: number; tabcolor?: string };
   }) => {
     const [tabtype, settabtype] = useState<number>(v.tabtype);
-
-    const updateTabSetting = (
-      name: string,
-      data: { tabtype: number; tabcolor?: string }
-    ) => {
-      const tabcolor = data.tabcolor ?? "fff3f3";
-      if (
-        !!tabSetting[name] &&
-        tabSetting[name].tabtype == data.tabtype &&
-        tabSetting[name].tabcolor == tabcolor
-      )
-        return;
-      const newTabSetting = { ...tabSetting };
-      newTabSetting[name] = {
-        tabtype: data.tabtype,
-        tabcolor: tabcolor,
-      };
-      setTabSetting(newTabSetting);
-    };
     const onValueChange = (index: string) => {
       settabtype(Number(index));
-      updateTabSetting(name, {
+      deffTabSetting.current[name] = {
         tabtype: Number(index),
-      });
+        tabcolor: undefined,
+      };
       const data = {
         name: name,
         tabtype: Number(index),
@@ -105,10 +89,10 @@ const DetailPageComponent = () => {
       window.electron.logdataSet(id, data);
     };
     const onColorChange = (c: { h: number; s: number; l: number }) => {
-      updateTabSetting(name, {
+      deffTabSetting.current[name] = {
         tabtype: tabtype,
         tabcolor: ColorUtils.hsl2code(c),
-      });
+      };
       const data = {
         name: name,
         tabtype: tabtype,
@@ -141,7 +125,7 @@ const DetailPageComponent = () => {
               value={
                 v.tabcolor
                   ? ColorUtils.code2hsl(v.tabcolor as ColorUtils.Code)
-                  : undefined
+                  : { h: 0, s: 100, l: 98 }
               }
             />
           )}
@@ -174,6 +158,31 @@ const DetailPageComponent = () => {
     }
   };
 
+  const onOpenChange = (isOpen: boolean) => {
+    if (isOpen) {
+      deffTabSetting.current = {};
+    } else {
+      let isChanged = false;
+      const newTabSetting = { ...tabSetting };
+      Object.keys(deffTabSetting.current).forEach((name) => {
+        const data = deffTabSetting.current[name];
+        if (
+          !tabSetting[name] ||
+          tabSetting[name].tabtype != data.tabtype ||
+          tabSetting[name].tabcolor != data.tabcolor
+        ) {
+          isChanged = true;
+          if (!newTabSetting[name]) newTabSetting[name] = { tabtype: 0 };
+          newTabSetting[name].tabtype = data.tabtype;
+          if (data.tabcolor) newTabSetting[name].tabcolor = data.tabcolor;
+        }
+      });
+      if (isChanged) {
+        setTabSetting(newTabSetting);
+        window.electron.saveHtml(pageName.current);
+      }
+    }
+  };
   const sortedTabs = useMemo(
     () =>
       Object.entries(tabSetting).sort(([ak, _av], [bk, _bv]) => {
@@ -200,7 +209,7 @@ const DetailPageComponent = () => {
 
   return (
     <div>
-      <Sheet>
+      <Sheet onOpenChange={onOpenChange}>
         <SheetTrigger className="fixed top-14 right-2" asChild>
           <Button variant="outline" size="icon">
             <ChevronRight />
