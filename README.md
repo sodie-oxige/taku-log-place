@@ -1,13 +1,35 @@
 # 卓ログ置き場
 
+![electron](https://img.shields.io/badge/-Electron-47848F.svg?logo=electron&style=popout&logoColor=white)
+![node.js](https://img.shields.io/badge/-Next.js-000000.svg?logo=next.js&style=popout)
+![shadcn/ui](https://img.shields.io/badge/-shadcn\/ui-000000.svg?logo=shadcnui&style=popout)
+
 ## 概要
 
-TRPG のセッションログなどの html ファイルを閲覧・管理するための windows デスクトップアプリ。  
+TRPG のセッションログなどの html ファイルを閲覧・管理するための windows デスクトップアプリ。
 
-複数フォルダのセッションログを一覧表示したり、  
+複数フォルダのセッションログを  
+一覧表示したり、  
 並び変えたり、  
 絞り込んだり、  
 名前・日付・タグを記録したりできます。
+
+## インストール
+
+releaseから最新版をダウンロードしてください。  
+ファイルはzip形式なので任意の場所で解凍し、中にある「卓ログ置き場.exe」を実行すれば使用できます。  
+
+### アンインストール
+
+インストール時に展開したファイルを削除してください。  
+`Users\(username)\AppData\Roaming\卓ログ置き場\`に設定ファイルなどがあるため、気になる方は削除してください。
+
+## リンク
+
+なにかあればこちらまで。  
+[![BlueSky](https://img.shields.io/badge/-bluesky-0285FF.svg?logo=bluesky&logoColor=white&style=popout)]([sodie-oxige.bsky.social](https://bsky.app/profile/sodie-oxige.bsky.social))
+
+***
 
 ## 機能
 
@@ -17,7 +39,7 @@ TRPG のセッションログなどの html ファイルを閲覧・管理する
 表のヘッダーをクリックすると名前か日付でソートが行えます。  
 再度クリックすると昇順と降順を切り替えられます。
 
-![基本画面](./doc/image01.png)
+<img alt="基本画面" src="./doc/image01.png" width="50%">
 
 #### 絞り込み機能
 
@@ -25,11 +47,11 @@ TRPG のセッションログなどの html ファイルを閲覧・管理する
 
 - 名前を空白区切り・部分一致で検索
 - 日付を範囲指定で検索
-- タグを複数指定・完全一致で検索
+- タグを空白区切り完全一致（\*:ワイルドカード）で検索
 
-![検索機能-名前](./doc/image-search-name.png)
-![検索機能-日付](./doc/image-search-date.png)
-![検索機能-タグ](./doc/image-search-tag.png)
+<img alt="検索機能-名前" src="./doc/image-search-name.png" width="50%">
+<img alt="検索機能-日付" src="./doc/image-search-date.png" width="50%">
+<img alt="検索機能-タグ" src="./doc/image-search-tag.png" width="50%">
 
 #### 編集機能
 
@@ -38,10 +60,10 @@ TRPG のセッションログなどの html ファイルを閲覧・管理する
 （並びは現在の表示順のままなので、ソートを行う場合はカラムヘッダーを再度クリックする必要あり。）
 
 > [!TIP]
-> データの編集はhtmlファイルそのものを操作するのではなく、htmlファイルが置かれているフォルダに「modifier.json」という設定ファイルを作成して読み込んでいます。  
+> データの編集は html ファイルそのものを操作するのではなく、html ファイルが置かれているフォルダに「modifier.json」という設定ファイルを作成して読み込んでいます。  
 > テキストディタ等での編集を行うと予期せぬエラーが発生する恐れがあります。どうしようもなくなった場合は削除してください。
 
-![編集機能](./doc/image-edit.png)
+<img alt="編集機能" src="./doc/image-edit.png" width="50%">
 
 ### ログ監視フォルダの設定
 
@@ -53,14 +75,26 @@ TRPG のセッションログなどの html ファイルを閲覧・管理する
 > [!TIP]
 > 監視を外しても設定ファイル(modifier.json)は削除されません。必要に応じて削除してください。
 
-![基本画面](./doc/image-monitoring.png)
+<img alt="基本画面" src="./doc/image-monitoring.png" width="50%">
 
 ### ログ閲覧画面
 
 ログ一覧画面の表からクリックでログ閲覧画面に遷移します。  
 ログの中身が（ちょっぴり整形されて）表示され、閲覧することができます。
 
-![基本画面](./doc/image-detail.png)
+画面右上の「>」ボタンからタブ設定画面を開くことができ、各タブの表示を自身で設定できます。  
+「カラー」のみ背景色も設定可能です。  
+（設定しなくてもある程度は見やすくなっているはず。）
+
+<img alt="基本画面" src="./doc/image-detail.png" width="50%">
+<img alt="タブ設定画面" src="./doc/image-detail-tabsetting.png" width="50%">
+<img alt="タブ設定画面(カラー)" src="./doc/image-detail-tabsetting-color.png" width="50%">
+
+### ローカル保存
+
+本アプリは基本的に Windows 向けのデスクトップアプリですが、スマートフォンなどでも閲覧できるようにローカルの HTML ファイルとして出力する機能を備えています。  
+ただし、あくまで補助的な機能です。デスクトップアプリの機能はほぼなく成形済みファイルが閲覧できるのみとなります。  
+ファイルは`Users\(username)\AppData\Roaming\卓ログ置き場\logfile`に「(ログ名).html」保存されます。同名のログは上書き保存されます。
 
 ***
 
@@ -71,12 +105,22 @@ TRPG のセッションログなどの html ファイルを閲覧・管理する
 
 ## 更新履歴
 
+- **v1.3.0** (2025-03-19)
+  - ログ一覧画面
+    - タグ検索のリメイク
+      - マルチプルのセレクトボックスではなく、テキスト入力に
+  - ログ閲覧画面
+    - タブ表示の設定機能追加
+      - タブごとの表示方法をユーザー側でも変更可能に
+      - 選択できるタブ表示に背景色を自由に指定できる「カラー」を追加
+  - ローカル保存
+    - ログ閲覧画面をローカルにも保存する機能追加(スマホなどで見ることを想定)
 - **v1.2.0** (2025-02-07)
   - ログ閲覧画面
     - メイン、情報、雑談、その他のタブ・パラメータ変更の際の表示を分別
   - 監視フォルダ
     - 監視フォルダの削除を実装
-  - ログ一覧のUI改善
+  - ログ一覧の UI 改善
     - 検索・編集の日付入力で年単位のカレンダー移動を可能に
     - ページネーションのボタン位置を固定
     - デフォルトの並び順を新しい順に
