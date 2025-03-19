@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Header from "./header";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,7 +21,7 @@ const ClientLayout = ({
     <body className="flex flex-col h-screen">
       <Header onTriggerReload={triggerReload} />
       <ScrollArea className="flex-1 h-full">
-        <main className="container mx-auto" key={`main_${reloadKey}`}>
+        <main className="container mx-auto w-[100dvw]" key={`main_${reloadKey}`}>
           {children}
         </main>
       </ScrollArea>
