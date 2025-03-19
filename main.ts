@@ -284,22 +284,22 @@ ipcMain.handle("save-html", async (_event, name: string) => {
         const clone = document.documentElement.cloneNode(true);
         
         // 不要なタグを削除
-        clone.querySelectorAll('script, link[rel="modulepreload"], link[rel="preload"]').forEach(el => el.remove());
+        clone.querySelectorAll('script, link[rel="modulepreload"], link[rel="preload"],link[rel="stylesheet"]').forEach(el => el.remove());
         clone.querySelectorAll('a').forEach(el => el.setAttribute("href","?"));
 
         // CSSを埋め込み
-          Array.from(document.styleSheets).map(async (sheet) => {
-            try {
-              if (sheet.href) {
-                const response = await fetch(sheet.href);
-                return response.ok ? await response.text() : '';
-              } else {
-                return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\\n');
-              }
-            } catch (e) {
-              return '';
+        Array.from(document.styleSheets).map(async (sheet) => {
+          try {
+            if (sheet.href) {
+              const response = await fetch(sheet.href);
+              return response.ok ? await response.text() : '';
+            } else {
+              return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\\n');
             }
-          })
+          } catch (e) {
+            return '';
+          }
+        })
 
         const styleSheets = await Promise.all(
           Array.from(document.styleSheets).map(async (sheet) => {
@@ -319,6 +319,51 @@ ipcMain.handle("save-html", async (_event, name: string) => {
         const styleTag = document.createElement('style');
         styleTag.textContent = styleSheets.join('\\n');
         clone.querySelector('head').appendChild(styleTag);
+
+        //スクロールの復活
+        const scriptContent = \`
+        <script>
+          document.querySelectorAll("[data-radix-scroll-area-viewport]").forEach((elem) => {
+            const maxHeight = elem.scrollHeight;
+            const displayHeight = elem.clientHeight;
+            const bar = elem.nextElementSibling;
+            const thumb = bar?.firstChild;
+            if (!(bar instanceof HTMLElement && thumb instanceof HTMLElement)) return;
+            const thumbHeight = bar.clientHeight * Math.max(displayHeight / maxHeight, 0.05);
+            bar.style.setProperty("transform", "translate3d(0, 0, 0)");
+            bar.style.setProperty("--radix-scroll-area-thumb-height", \\\`\\\${thumbHeight}px\\\`);
+            let progress = 0;
+            elem.addEventListener("scroll", () => {
+              progress = elem.scrollTop / (maxHeight - displayHeight);
+              thumb.style.setProperty("translate", \\\`0 \\\${(bar.clientHeight - thumbHeight) * progress}px\\\`);
+            });
+            let isDragging = false;
+            let startY = 0;
+            let startScroll = 0;
+
+            thumb.addEventListener("pointerdown", (e) => {
+              e.preventDefault();
+              isDragging = true;
+              startY = e.clientY;
+              startScroll = elem.scrollTop;
+              document.body.style.userSelect = "none";
+            });
+
+            document.addEventListener("pointermove", (e) => {
+              if (!isDragging) return;
+              const currentY = e.clientY;
+              const deltaY = currentY - startY;
+              const scrollDelta = (deltaY / (bar.clientHeight - thumbHeight)) * (maxHeight - displayHeight);
+              elem.scrollTop = startScroll + scrollDelta;
+            });
+
+            document.addEventListener("pointerup", () => {
+              isDragging = false;
+              document.body.style.userSelect = "";
+            });
+          });
+        </script>\`;
+        clone.querySelector("body").insertAdjacentHTML("beforeend", scriptContent);
 
         return clone.outerHTML;
       })();
@@ -356,4 +401,4 @@ const getModifier = (data: any): TlogfileSetting => {
   }
   res.ver = version;
   return res;
-}
+};

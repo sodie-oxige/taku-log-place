@@ -210,7 +210,7 @@ const DetailPageComponent = () => {
   return (
     <div>
       <Sheet onOpenChange={onOpenChange}>
-        <SheetTrigger className="fixed top-14 right-2" asChild>
+        <SheetTrigger className="fixed top-14 right-4" asChild>
           <Button variant="outline" size="icon">
             <ChevronRight />
           </Button>
