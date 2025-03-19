@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -32,7 +32,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, CalendarIcon, Check } from "lucide-react";
+import { ArrowUpDown, CalendarIcon, Check, Ghost } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -50,17 +50,10 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Badge } from "@/components/ui/badge";
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-} from "@/components/ui/command";
 import { ja } from "date-fns/locale/ja";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 const columns: ColumnDef<TlogfileMetadata>[] = [
   {
@@ -138,16 +131,35 @@ const columns: ColumnDef<TlogfileMetadata>[] = [
       th: "w-[40%] text-center",
       td: "relative p-0 mask-gradient",
     },
-    filterFn: (row, columnId, filterValue: string[]) => {
+    filterFn: (row, columnId, filterValue: string) => {
       const rowTags = row.getValue(columnId) as string[];
-      let res = true;
-      filterValue.forEach((f) => {
-        res &&= rowTags.includes(f);
-      });
-      return res;
+      return filterValue.split(" ").reduce(
+        (r, v) =>
+          r &&
+          rowTags.reduce((r2, t) => {
+            if (v == "") return true;
+            const searchWords = v.split("*");
+            let text = t;
+            for (let i = 0; i < searchWords.length; i++) {
+              const index = text.indexOf(searchWords[i]);
+              if (i == 0 && index != 0) return r2;
+              if (index < 0) return r2;
+              text = text.slice(index + searchWords[i].length);
+            }
+            return (
+              r2 || searchWords[searchWords.length - 1] == "" || text == ""
+            );
+          }, false),
+        true
+      );
     },
   },
 ];
+
+interface Tcommand {
+  value: string;
+  label: string;
+}
 
 const IndexPage = () => {
   const [logfile, setlogfile] = useState<TlogfileMetadata[]>([]);
@@ -200,10 +212,6 @@ const IndexPage = () => {
     router.push(path);
   };
 
-  interface Tcommand {
-    value: string;
-    label: string;
-  }
   let taglist: Tcommand[] = logfile.reduce(
     (a, l) =>
       a.concat(
@@ -224,7 +232,7 @@ const IndexPage = () => {
       path: "",
       date: 0,
       tag: [],
-      tabs: {}
+      tabs: {},
     },
     set: (id, type, data) => {
       const row = table.getRow(id);
@@ -264,8 +272,6 @@ const IndexPage = () => {
   let clickType: "left" | "right" = "left";
 
   const dateRange = table.getColumn("date")?.getFilterValue() as DateRange;
-  const selectedTag = (table.getColumn("tag")?.getFilterValue() ||
-    []) as string[];
 
   const rowSpan = pageSize - table.getRowModel().rows?.length;
   return (
@@ -362,57 +368,13 @@ const IndexPage = () => {
           <Label htmlFor="search_tag" className="text-sm text-gray-500">
             tag
           </Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                id="search_tag"
-                className="flex justify-start overflow-x-auto"
-              >
-                {selectedTag?.length
-                  ? selectedTag.map((s, i) => (
-                      <Badge key={`selectedtag_${i}`}>
-                        {taglist.find((t) => t.value == s)?.label}
-                      </Badge>
-                    ))
-                  : ""}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Command>
-                <CommandInput />
-                <CommandList>
-                  <CommandEmpty>タグが見つかりませんでした。</CommandEmpty>
-                  <CommandGroup>
-                    {taglist.map((tag) => (
-                      <CommandItem
-                        key={tag.value}
-                        value={tag.value}
-                        onSelect={(currentValue) => {
-                          table
-                            .getColumn("tag")
-                            ?.setFilterValue(
-                              selectedTag?.includes(currentValue)
-                                ? selectedTag.filter((e) => e != currentValue)
-                                : selectedTag.concat(currentValue)
-                            );
-                        }}
-                      >
-                        <Check
-                          className={`mr-2 h-4 w-4 ${
-                            selectedTag?.includes(tag.value)
-                              ? "opacity-100"
-                              : "opacity-0"
-                          }`}
-                        />
-                        {tag.label}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <SearchboxTag
+            value={(table.getColumn("tag")?.getFilterValue() as string) ?? ""}
+            taglist={taglist}
+            onChange={(value) => {
+              table.getColumn("tag")?.setFilterValue(value);
+            }}
+          />
         </div>
       </div>
       <Table className="table-fixed">
@@ -554,6 +516,114 @@ const IndexPage = () => {
         maxPage={maxPage}
       />
     </>
+  );
+};
+
+const SearchboxTag = ({
+  value,
+  taglist,
+  onChange,
+}: {
+  value: string;
+  taglist: Tcommand[];
+  onChange?: (text: string) => void;
+}) => {
+  const words = useRef<string[]>([]);
+  const [word, setWord] = useState<string>("");
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const selectRef = useRef<HTMLDivElement | null>(null);
+  let input: HTMLInputElement, select: HTMLElement;
+
+  useEffect(() => {
+    if (input && select) return;
+    if (!(inputRef.current && selectRef.current)) return;
+    input = inputRef.current;
+    select = selectRef.current;
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (input.contains(target) || select.contains(target)) {
+        select.dataset.open = "true";
+        select.dataset.visible = "true";
+      } else {
+        select.dataset.open = "false";
+        setTimeout(() => {
+          select.dataset.visible = "false";
+        }, 100);
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  });
+
+  const onInput = () => {
+    words.current = input.value.split(" ");
+    const cursorPos = input.selectionStart;
+    const value = input.value;
+    if (!cursorPos) return;
+
+    const beforeCursor = value.slice(0, cursorPos);
+    const afterCursor = value.slice(cursorPos);
+    const startIdx = beforeCursor.lastIndexOf(" ") + 1;
+    const endIdx = afterCursor.indexOf(" ");
+    const wordEnd = endIdx === -1 ? value.length : cursorPos + endIdx;
+
+    const currentWord = value.slice(startIdx, wordEnd);
+    setWord(currentWord);
+
+    if (onChange) onChange(input.value);
+  };
+
+  const onClick = (value: string) => {
+    const index = words.current.indexOf(word);
+    const newWords = [
+      ...words.current.slice(0, index),
+      value,
+      ...words.current.slice(index + 1),
+    ];
+    words.current = newWords;
+    input.value = newWords.join(" ");
+    setWord(value);
+
+    if (onChange) onChange(input.value);
+  };
+
+  return (
+    <div className="relative">
+      <Input ref={inputRef} onInput={onInput} defaultValue={value} />
+      <div
+        data-open={false}
+        data-visible={false}
+        className="flex flex-col data-[visible=false]:hidden !absolute top-10 right-0 z-10 w-full bg-white border rounded-md shadow-md data-[open=true]:animate-in data-[open=false]:animate-out data-[open=true]:fade-in-0 data-[open=false]:fade-out-0 data-[open=true]:zoom-in-95 data-[open=false]:zoom-out-95 slide-in-from-top-2"
+        ref={selectRef}
+      >
+        <ScrollArea className="max-h-[calc(100vh_-_12rem)]">
+          {taglist
+            .filter((tag) => tag.label.indexOf(word) == 0)
+            .map((tag) => (
+              <Fragment key={`tag_select_${tag.value}`}>
+                <Button
+                  variant={"ghost"}
+                  className="w-full justify-start"
+                  onClick={() => onClick(tag.label)}
+                >
+                  {tag.label}
+                </Button>
+                <Separator />
+              </Fragment>
+            ))}
+        </ScrollArea>
+        <Separator />
+        <div className="mt-2 mb-3 mx-auto text-xs text-gray-500">
+          完全一致で検索。
+          <br />
+          <span className="font-semibold">*</span>
+          で長さ不定のワイルドカードを指定できます。
+        </div>
+      </div>
+    </div>
   );
 };
 
