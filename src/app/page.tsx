@@ -616,7 +616,7 @@ const SearchboxTag = ({
             ))}
         </ScrollArea>
         <Separator />
-        <div className="mt-2 mb-3 mx-auto text-xs text-gray-500">
+        <div className="mx-auto p-2 text-xs text-gray-500">
           完全一致で検索。
           <br />
           <span className="font-semibold">*</span>
