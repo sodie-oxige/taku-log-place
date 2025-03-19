@@ -27,7 +27,7 @@ releaseから最新版をダウンロードしてください。
 ## リンク
 
 なにかあればこちらまで。  
-[![BlueSky](https://img.shields.io/badge/-bluesky-0285FF.svg?logo=bluesky&logoColor=white&style=popout)]([sodie-oxige.bsky.social](https://bsky.app/profile/sodie-oxige.bsky.social))
+[![BlueSky](https://img.shields.io/badge/-bluesky-0285FF.svg?logo=bluesky&logoColor=white&style=popout)](https://bsky.app/profile/sodie-oxige.bsky.social)
 
 ***
 
