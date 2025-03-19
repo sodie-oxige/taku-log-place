@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -32,7 +32,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, CalendarIcon, Check } from "lucide-react";
+import { ArrowUpDown, CalendarIcon, Check, Ghost } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -61,6 +61,7 @@ import {
 import { ja } from "date-fns/locale/ja";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 const columns: ColumnDef<TlogfileMetadata>[] = [
   {
@@ -224,7 +225,7 @@ const IndexPage = () => {
       path: "",
       date: 0,
       tag: [],
-      tabs: {}
+      tabs: {},
     },
     set: (id, type, data) => {
       const row = table.getRow(id);
@@ -266,6 +267,101 @@ const IndexPage = () => {
   const dateRange = table.getColumn("date")?.getFilterValue() as DateRange;
   const selectedTag = (table.getColumn("tag")?.getFilterValue() ||
     []) as string[];
+
+  const SearchboxTag = () => {
+    const [tags, setTags] = useState<string[]>([]);
+
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const selectRef = useRef<HTMLDivElement | null>(null);
+    let input: HTMLElement, select: HTMLElement;
+
+    useEffect(() => {
+      if (input && select) return;
+      if (!(inputRef.current && selectRef.current)) return;
+      input = inputRef.current;
+      select = selectRef.current;
+
+      document.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        if (input.contains(target) || select.contains(target)) {
+          select.ariaHidden = "false";
+        } else {
+          select.ariaHidden = "true";
+        }
+      });
+    });
+
+    return (
+      <div className="relative">
+        <Input className="inputBox" ref={inputRef} />
+        <ScrollArea
+          aria-hidden={true}
+          className="block aria-[hidden=true]:hidden !absolute top-10 right-0 z-10 w-full h-[calc(100vh_-_8rem)] bg-white border rounded"
+          ref={selectRef}
+        >
+          {taglist.map((tag) => (
+            <Fragment key={`tag_select_${tag.value}`}>
+              <Button variant={"ghost"} className="w-full justify-start">
+                {tag.label}
+              </Button>
+              <Separator />
+            </Fragment>
+          ))}
+        </ScrollArea>
+        {/* <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant={"outline"}
+              id="search_tag"
+              className="flex justify-start overflow-x-auto"
+            >
+              {selectedTag?.length
+                ? selectedTag.map((s, i) => (
+                    <Badge key={`selectedtag_${i}`}>
+                      {taglist.find((t) => t.value == s)?.label}
+                    </Badge>
+                  ))
+                : ""}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Command>
+              <CommandInput />
+              <CommandList>
+                <CommandEmpty>タグが見つかりませんでした。</CommandEmpty>
+                <CommandGroup>
+                  {taglist.map((tag) => (
+                    <CommandItem
+                      key={tag.value}
+                      value={tag.value}
+                      onSelect={(currentValue) => {
+                        table
+                          .getColumn("tag")
+                          ?.setFilterValue(
+                            selectedTag?.includes(currentValue)
+                              ? selectedTag.filter((e) => e != currentValue)
+                              : selectedTag.concat(currentValue)
+                          );
+                      }}
+                    >
+                      <Check
+                        className={`mr-2 h-4 w-4 ${
+                          selectedTag?.includes(tag.value)
+                            ? "opacity-100"
+                            : "opacity-0"
+                        }`}
+                      />
+                      {tag.label}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover> */}
+      </div>
+    );
+  };
 
   const rowSpan = pageSize - table.getRowModel().rows?.length;
   return (
@@ -362,57 +458,7 @@ const IndexPage = () => {
           <Label htmlFor="search_tag" className="text-sm text-gray-500">
             tag
           </Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                id="search_tag"
-                className="flex justify-start overflow-x-auto"
-              >
-                {selectedTag?.length
-                  ? selectedTag.map((s, i) => (
-                      <Badge key={`selectedtag_${i}`}>
-                        {taglist.find((t) => t.value == s)?.label}
-                      </Badge>
-                    ))
-                  : ""}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Command>
-                <CommandInput />
-                <CommandList>
-                  <CommandEmpty>タグが見つかりませんでした。</CommandEmpty>
-                  <CommandGroup>
-                    {taglist.map((tag) => (
-                      <CommandItem
-                        key={tag.value}
-                        value={tag.value}
-                        onSelect={(currentValue) => {
-                          table
-                            .getColumn("tag")
-                            ?.setFilterValue(
-                              selectedTag?.includes(currentValue)
-                                ? selectedTag.filter((e) => e != currentValue)
-                                : selectedTag.concat(currentValue)
-                            );
-                        }}
-                      >
-                        <Check
-                          className={`mr-2 h-4 w-4 ${
-                            selectedTag?.includes(tag.value)
-                              ? "opacity-100"
-                              : "opacity-0"
-                          }`}
-                        />
-                        {tag.label}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <SearchboxTag />
         </div>
       </div>
       <Table className="table-fixed">
