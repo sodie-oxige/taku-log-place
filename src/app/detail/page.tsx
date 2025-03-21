@@ -256,10 +256,10 @@ const MainStatement = ({ statement }: { statement: TlogcolumnData }) => {
         } as React.CSSProperties
       }
     >
-      <span className="text-sm font-bold text-[var(--c)]">
+      <span className="text-2xs font-bold text-[var(--c)]">
         {statement.name}
       </span>
-      <p className="ml-1">
+      <p className="mt-1 ml-2 text-lg">
         {statement.content.split("\n").map((line, index) => (
           <Fragment key={index}>
             {line}
@@ -281,8 +281,8 @@ const OtherStatement = ({ statement }: { statement: TlogcolumnData }) => {
         } as React.CSSProperties
       }
     >
-      <span className="text-xs font-bold">{statement.name}</span>
-      <p className="text-xs">
+      <span className="text-2xs font-bold">{statement.name}</span>
+      <p className="ml-2 text-sm">
         {statement.content.split("\n").map((line, index) => (
           <Fragment key={index}>
             {line}
@@ -311,8 +311,8 @@ const ColorStatement = ({
         } as React.CSSProperties
       }
     >
-      <span className="text-xs font-bold">{statement.name}</span>
-      <p className="text-xs">
+      <span className="text-2xs font-bold">{statement.name} [{statement.tab}]</span>
+      <p className="ml-2 text-sm">
         {statement.content.split("\n").map((line, index) => (
           <Fragment key={index}>
             {line}
@@ -369,10 +369,10 @@ const InfoStatement = ({ statement }: { statement: TlogcolumnData }) => {
         } as React.CSSProperties
       }
     >
-      <span className="text-xs font-bold text-[var(--c)]">
+      <span className="text-2xs font-bold text-[var(--c)]">
         {statement.name}
       </span>
-      <p className="ml-2 p-2">
+      <p className="ml-2 p-2 text-lg">
         {statement.content.split("\n").map((line, index) => (
           <Fragment key={index}>
             {line}
@@ -394,10 +394,10 @@ const AnotherStatement = ({ statement }: { statement: TlogcolumnData }) => {
         } as React.CSSProperties
       }
     >
-      <p className="text-sm font-bold text-[var(--c)]">
-        {statement.name} <span className="text-xs">[{statement.tab}]</span>
+      <p className="text-2xs font-bold text-[var(--c)]">
+        {statement.name} [{statement.tab}]
       </p>
-      <p>
+      <p className="ml-2 text-sm">
         {statement.content.split("\n").map((line, index) => (
           <Fragment key={index}>
             {line}
