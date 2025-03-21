@@ -120,7 +120,6 @@ ipcMain.handle("logfiles:get", () => {
     if (!JsonManage.isDefined(jsonName))
       JsonManage.init(jsonName, jsonPath, {
         ver: version,
-        tabs: {},
         cols: {},
       });
     const data: TlogfileMetadata = getModifier(JsonManage.get(jsonName)).cols[
@@ -139,18 +138,17 @@ ipcMain.handle("logfiles:get", () => {
 
 ipcMain.handle("logfile:set", (_event, data: TlogfileMetadata) => {
   const dirPath = path.dirname(data.path);
-  const fileaName = path.basename(data.path);
+  const fileName = path.basename(data.path);
   const jsonName = dirPath;
   const jsonPath = path.resolve(dirPath, "modifier.json");
   if (!JsonManage.isDefined(jsonName))
     JsonManage.init(jsonName, jsonPath, {
       ver: version,
-      tabs: {},
       cols: {},
     } as TlogfileSetting);
   let modifierJson: TlogfileSetting = getModifier(JsonManage.get(jsonName));
-  modifierJson.cols[fileaName] = data;
-  JsonManage.update(jsonName, modifierJson);
+  modifierJson.cols[fileName] = data;
+  setModifier(jsonName, modifierJson);
 });
 
 ipcMain.handle("logdata:get", (_event, id: string) => {
@@ -162,7 +160,6 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
   if (!JsonManage.isDefined(dirPath))
     JsonManage.init(dirPath, jsonPath, {
       ver: version,
-      tabs: {},
       cols: {},
     } as TlogfileSetting);
   let modifierJson: TlogfileSetting = getModifier(JsonManage.get(dirPath));
@@ -260,7 +257,6 @@ ipcMain.handle(
     if (!JsonManage.isDefined(dirPath))
       JsonManage.init(dirPath, jsonPath, {
         ver: version,
-        tabs: {},
         cols: {},
       } as TlogfileSetting);
     const json = getModifier(JsonManage.get(dirPath));
@@ -280,7 +276,7 @@ ipcMain.handle(
       };
     json.cols[fileName].tabs[data.name].tabtype = data.tabtype;
     if (data.color) json.cols[fileName].tabs[data.name].tabcolor = data.color;
-    JsonManage.update(dirPath, json);
+    setModifier(dirPath, json);
     return;
   }
 );
@@ -411,4 +407,8 @@ const getModifier = (data: any): TlogfileSetting => {
   }
   res.ver = version;
   return res;
+};
+const setModifier = (name: string, data: TlogfileSetting): void => {
+  data.ver = version;
+  JsonManage.update(name, data);
 };
