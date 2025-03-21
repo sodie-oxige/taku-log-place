@@ -118,7 +118,11 @@ ipcMain.handle("logfiles:get", () => {
     const jsonName = dirPath;
     const jsonPath = path.resolve(dirPath, "modifier.json");
     if (!JsonManage.isDefined(jsonName))
-      JsonManage.init(jsonName, jsonPath, {});
+      JsonManage.init(jsonName, jsonPath, {
+        ver: version,
+        tabs: {},
+        cols: {},
+      });
     const data: TlogfileMetadata = getModifier(JsonManage.get(jsonName)).cols[
       fileName
     ];
@@ -138,7 +142,12 @@ ipcMain.handle("logfile:set", (_event, data: TlogfileMetadata) => {
   const fileaName = path.basename(data.path);
   const jsonName = dirPath;
   const jsonPath = path.resolve(dirPath, "modifier.json");
-  if (!JsonManage.isDefined(jsonName)) JsonManage.init(jsonName, jsonPath, {});
+  if (!JsonManage.isDefined(jsonName))
+    JsonManage.init(jsonName, jsonPath, {
+      ver: version,
+      tabs: {},
+      cols: {},
+    } as TlogfileSetting);
   let modifierJson: TlogfileSetting = getModifier(JsonManage.get(jsonName));
   modifierJson.cols[fileaName] = data;
   JsonManage.update(jsonName, modifierJson);
@@ -159,11 +168,11 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
   let modifierJson: TlogfileSetting = getModifier(JsonManage.get(dirPath));
   const res: TlogfileData = {
     metadata: {
-      name: modifierJson.cols?.[fileName].name || fileName,
+      name: modifierJson.cols?.[fileName]?.name || fileName,
       path: id,
-      date: modifierJson.cols?.[fileName].date || 0,
-      tag: modifierJson.cols?.[fileName].tag || [],
-      tabs: modifierJson.cols?.[fileName].tabs || {},
+      date: modifierJson.cols?.[fileName]?.date || 0,
+      tag: modifierJson.cols?.[fileName]?.tag || [],
+      tabs: modifierJson.cols?.[fileName]?.tabs || {},
     },
     colmuns: [],
   };
@@ -393,8 +402,9 @@ const getModifier = (data: any): TlogfileSetting => {
   };
   let res = def;
   if (!("ver" in data)) {
-    //v1.2.0以前
+    // v1.2.0以前
     res["cols"] = data;
+    // vx.x.x以前
     // } else if (!compareVersion(data["ver"], [9, 9, 9])) {
   } else {
     res = data;
