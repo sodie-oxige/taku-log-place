@@ -21,7 +21,7 @@ const ClientLayout = ({
     <body className="flex flex-col h-screen">
       <Header onTriggerReload={triggerReload} />
       <ScrollArea className="flex-1 h-full">
-        <main className="container mx-auto w-[100dvw]" key={`main_${reloadKey}`}>
+        <main className="container mx-auto px-4 w-[100dvw]" key={`main_${reloadKey}`}>
           {children}
         </main>
       </ScrollArea>

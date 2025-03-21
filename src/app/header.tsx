@@ -6,6 +6,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuLabel,
+  DropdownMenuGroup,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Cog, Shrink, Maximize, X, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -32,13 +34,13 @@ const Header = ({ onTriggerReload }: { onTriggerReload: () => void }) => {
 
   const addLogdir = async () => {
     const logdir = await window.electron.logdirAdd();
-    if (logdir && logdir.length <= 0) setLogdir(logdir);
+    setLogdir(logdir);
     onTriggerReload();
   };
 
-  const deleteLogdir = (dir: string) => {
-    const logdir = window.electron.logdirDelete(dir);
-    if (logdir && logdir.length <= 0) setLogdir(logdir);
+  const deleteLogdir = async (dir: string) => {
+    const logdir = await window.electron.logdirDelete(dir);
+    setLogdir(logdir);
     onTriggerReload();
   };
 
@@ -54,17 +56,28 @@ const Header = ({ onTriggerReload }: { onTriggerReload: () => void }) => {
           <DropdownMenuLabel className="text-lg font-bold">
             ログ監視フォルダ
           </DropdownMenuLabel>
-          {logdir.map((l) => (
-            <DropdownMenuLabel key={l} className="flex justify-between">
-              {l}
-              <Trash2
-                className="text-red-500"
-                onClick={() => deleteLogdir(l)}
-              />
-            </DropdownMenuLabel>
-          ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            {logdir.length > 0 ? (
+              logdir.map((l) => (
+                <DropdownMenuLabel
+                  key={l}
+                  className="flex justify-between items-center gap-4"
+                >
+                  <span>{l}</span>
+                  <Button variant={"ghost"} onClick={() => deleteLogdir(l)}>
+                    <Trash2 className="text-red-500" />
+                  </Button>
+                </DropdownMenuLabel>
+              ))
+            ) : (
+              <DropdownMenuLabel className="mx-4 text-sm text-gray-500">
+                監視フォルダが設定されていません
+              </DropdownMenuLabel>
+            )}
+          </DropdownMenuGroup>
           <DropdownMenuLabel className="text-lg font-bold">
-            <Button onClick={addLogdir}>追加</Button>
+            <Button variant={"outline"} className="w-full" onClick={addLogdir}>追加</Button>
           </DropdownMenuLabel>
         </DropdownMenuContent>
       </DropdownMenu>
