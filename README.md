@@ -39,7 +39,9 @@ releaseから最新版をダウンロードしてください。
 表のヘッダーをクリックすると名前か日付でソートが行えます。  
 再度クリックすると昇順と降順を切り替えられます。
 
-<img alt="基本画面" src="./doc/image01.png" width="50%">
+<p align="center">
+  <img alt="基本画面" src="./doc/image01.png" width="800px">
+</p>
 
 #### 絞り込み機能
 
@@ -49,9 +51,11 @@ releaseから最新版をダウンロードしてください。
 - 日付を範囲指定で検索
 - タグを空白区切り完全一致（\*:ワイルドカード）で検索
 
-<img alt="検索機能-名前" src="./doc/image-search-name.png" width="50%">
-<img alt="検索機能-日付" src="./doc/image-search-date.png" width="50%">
-<img alt="検索機能-タグ" src="./doc/image-search-tag.png" width="50%">
+<p align="center">
+    <img alt="検索機能-名前" src="./doc/image-search-name.png" width="266px">
+    <img alt="検索機能-日付" src="./doc/image-search-date.png" width="266px">
+    <img alt="検索機能-タグ" src="./doc/image-search-tag.png" width="266px">
+</p>
 
 #### 編集機能
 
@@ -63,7 +67,9 @@ releaseから最新版をダウンロードしてください。
 > データの編集は html ファイルそのものを操作するのではなく、html ファイルが置かれているフォルダに「modifier.json」という設定ファイルを作成して読み込んでいます。  
 > テキストディタ等での編集を行うと予期せぬエラーが発生する恐れがあります。どうしようもなくなった場合は削除してください。
 
-<img alt="編集機能" src="./doc/image-edit.png" width="50%">
+<p align="center">
+  <img alt="編集機能" src="./doc/image-edit.png" width="800px">
+</p>
 
 ### ログ監視フォルダの設定
 
@@ -75,7 +81,9 @@ releaseから最新版をダウンロードしてください。
 > [!TIP]
 > 監視を外しても設定ファイル(modifier.json)は削除されません。必要に応じて削除してください。
 
-<img alt="基本画面" src="./doc/image-monitoring.png" width="50%">
+<p align="center">
+  <img alt="基本画面" src="./doc/image-monitoring.png" width="800px">
+</p>
 
 ### ログ閲覧画面
 
@@ -86,9 +94,11 @@ releaseから最新版をダウンロードしてください。
 「カラー」のみ背景色も設定可能です。  
 （設定しなくてもある程度は見やすくなっているはず。）
 
-<img alt="基本画面" src="./doc/image-detail.png" width="50%">
-<img alt="タブ設定画面" src="./doc/image-detail-tabsetting.png" width="50%">
-<img alt="タブ設定画面(カラー)" src="./doc/image-detail-tabsetting-color.png" width="50%">
+<p align="center">
+  <img alt="基本画面" src="./doc/image-detail.png" width="800px">
+  <img alt="タブ設定画面" src="./doc/image-detail-tabsetting.png" width="400px">
+  <img alt="タブ設定画面(カラー)" src="./doc/image-detail-tabsetting-color.png" width="400px">
+</p>
 
 ### ローカル保存
 
@@ -115,6 +125,8 @@ releaseから最新版をダウンロードしてください。
       - 選択できるタブ表示に背景色を自由に指定できる「カラー」を追加
   - ローカル保存
     - ログ閲覧画面をローカルにも保存する機能追加(スマホなどで見ることを想定)
+  - READMEの更新
+    - バッジとか、連絡先とか
 - **v1.2.0** (2025-02-07)
   - ログ閲覧画面
     - メイン、情報、雑談、その他のタブ・パラメータ変更の際の表示を分別
