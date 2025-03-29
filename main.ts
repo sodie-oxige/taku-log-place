@@ -397,7 +397,7 @@ const getModifier = (data: any): TlogfileSetting => {
     cols: {},
   };
   let res = def;
-  if (!("ver" in data)) {
+  if (!data.ver) {
     // v1.2.0以前
     res["cols"] = data;
     // vx.x.x以前
