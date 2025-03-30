@@ -32,7 +32,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, CalendarIcon, Check, Ghost } from "lucide-react";
+import { ArrowUpDown, CalendarIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -562,7 +562,7 @@ const SearchboxTag = ({
     words.current = input.value.split(" ");
     const cursorPos = input.selectionStart;
     const value = input.value;
-    if (!cursorPos) return;
+    if (cursorPos == null) return;
 
     const beforeCursor = value.slice(0, cursorPos);
     const afterCursor = value.slice(cursorPos);
