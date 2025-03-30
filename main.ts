@@ -38,10 +38,14 @@ app.on("ready", () => {
     width: 800,
     height: 600,
     frame: false,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
     },
+  });
+  mainWindow.once("ready-to-show", () => {
+    mainWindow?.show();
   });
 
   if (process.env.NODE_ENV === "development") {
