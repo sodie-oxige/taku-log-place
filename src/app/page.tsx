@@ -640,8 +640,10 @@ const IndexPagination = ({
 }) => {
   if (maxPage < minPage) return null;
   const paginationRange = Math.min(maxPage - minPage + 1, 9);
-  const isLeftEllipsis = currentPage >= minPage + 5;
-  const isRightEllipsis = currentPage <= maxPage - 5;
+  const isLeftEllipsis =
+    maxPage - minPage + 1 > 9 && currentPage >= minPage + 5;
+  const isRightEllipsis =
+    maxPage - minPage + 1 > 9 && currentPage <= maxPage - 5;
   const centerStart = !isLeftEllipsis
     ? minPage
     : !isRightEllipsis
