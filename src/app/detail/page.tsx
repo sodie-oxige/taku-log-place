@@ -135,26 +135,32 @@ const DetailPageComponent = () => {
   };
 
   const Statement = ({ statement }: { statement: TlogcolumnData }) => {
+    const props = {
+      author: statement.name,
+      content: statement.content,
+      tab: statement.tab,
+    };
     if (statement.name == "system")
-      return <SystemStatement statement={statement} />;
+      return <SystemStatement statement={statement} {...props} />;
     switch (tabSetting[statement.tab]?.tabtype) {
       case 0:
-        return <AnotherStatement statement={statement} />;
+        return <AnotherStatement statement={statement} {...props} />;
       case 1:
-        return <MainStatement statement={statement} />;
+        return <MainStatement statement={statement} {...props} />;
       case 2:
-        return <OtherStatement statement={statement} />;
+        return <OtherStatement statement={statement} {...props} />;
       case 3:
-        return <InfoStatement statement={statement} />;
+        return <InfoStatement statement={statement} {...props} />;
       case 4:
         return (
           <ColorStatement
             statement={statement}
             bg={tabSetting[statement.tab]?.tabcolor ?? "#fff3f3"}
+            {...props}
           />
         );
       default:
-        return <AnotherStatement statement={statement} />;
+        return <AnotherStatement statement={statement} {...props} />;
     }
   };
 
@@ -246,7 +252,12 @@ const DetailPageComponent = () => {
   );
 };
 
-const MainStatement = ({ statement }: { statement: TlogcolumnData }) => {
+const MainStatement = ({
+  statement,
+  ...props
+}: {
+  statement: TlogcolumnData;
+}) => {
   return (
     <div
       className="flex flex-col p-2.5"
@@ -255,6 +266,7 @@ const MainStatement = ({ statement }: { statement: TlogcolumnData }) => {
           "--c": statement.color,
         } as React.CSSProperties
       }
+      {...props}
     >
       <span className="text-2xs font-bold text-[var(--c)]">
         {statement.name}
@@ -271,7 +283,12 @@ const MainStatement = ({ statement }: { statement: TlogcolumnData }) => {
   );
 };
 
-const OtherStatement = ({ statement }: { statement: TlogcolumnData }) => {
+const OtherStatement = ({
+  statement,
+  ...props
+}: {
+  statement: TlogcolumnData;
+}) => {
   return (
     <div
       className="ml-6 flex flex-col p-2.5 text-[var(--c)]"
@@ -280,6 +297,7 @@ const OtherStatement = ({ statement }: { statement: TlogcolumnData }) => {
           "--c": statement.color,
         } as React.CSSProperties
       }
+      {...props}
     >
       <span className="text-2xs font-bold">{statement.name}</span>
       <p className="ml-2 text-sm">
@@ -297,6 +315,7 @@ const OtherStatement = ({ statement }: { statement: TlogcolumnData }) => {
 const ColorStatement = ({
   statement,
   bg,
+  ...props
 }: {
   statement: TlogcolumnData;
   bg: string;
@@ -310,8 +329,11 @@ const ColorStatement = ({
           backgroundColor: bg,
         } as React.CSSProperties
       }
+      {...props}
     >
-      <span className="text-2xs font-bold">{statement.name} [{statement.tab}]</span>
+      <span className="text-2xs font-bold">
+        {statement.name} [{statement.tab}]
+      </span>
       <p className="ml-2 text-sm">
         {statement.content.split("\n").map((line, index) => (
           <Fragment key={index}>
@@ -324,7 +346,12 @@ const ColorStatement = ({
   );
 };
 
-const SystemStatement = ({ statement }: { statement: TlogcolumnData }) => {
+const SystemStatement = ({
+  statement,
+  ...props
+}: {
+  statement: TlogcolumnData;
+}) => {
   const temp: string[] = statement.content
     .split(/[\[\]\:→]/)
     .map((v) => v.trim())
@@ -336,7 +363,7 @@ const SystemStatement = ({ statement }: { statement: TlogcolumnData }) => {
     after: temp[3],
   };
   return (
-    <div className="flex flex-col items-center p-2.5">
+    <div className="flex flex-col items-center p-2.5" {...props}>
       <p className="relative text-xs font-bold">
         <span className="absolute mr-2 right-[50%] whitespace-nowrap">
           {data.name}
@@ -359,7 +386,12 @@ const SystemStatement = ({ statement }: { statement: TlogcolumnData }) => {
   );
 };
 
-const InfoStatement = ({ statement }: { statement: TlogcolumnData }) => {
+const InfoStatement = ({
+  statement,
+  ...props
+}: {
+  statement: TlogcolumnData;
+}) => {
   return (
     <div
       className="m-1 mx-16 flex flex-col px-2 border-x"
@@ -368,6 +400,7 @@ const InfoStatement = ({ statement }: { statement: TlogcolumnData }) => {
           "--c": statement.color,
         } as React.CSSProperties
       }
+      {...props}
     >
       <span className="text-2xs font-bold text-[var(--c)]">
         {statement.name}
@@ -384,7 +417,12 @@ const InfoStatement = ({ statement }: { statement: TlogcolumnData }) => {
   );
 };
 
-const AnotherStatement = ({ statement }: { statement: TlogcolumnData }) => {
+const AnotherStatement = ({
+  statement,
+  ...props
+}: {
+  statement: TlogcolumnData;
+}) => {
   return (
     <div
       className="ml-6 flex flex-col p-2.5"
@@ -393,6 +431,7 @@ const AnotherStatement = ({ statement }: { statement: TlogcolumnData }) => {
           "--c": statement.color,
         } as React.CSSProperties
       }
+      {...props}
     >
       <p className="text-2xs font-bold text-[var(--c)]">
         {statement.name} [{statement.tab}]
