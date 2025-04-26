@@ -38,10 +38,14 @@ app.on("ready", () => {
     width: 800,
     height: 600,
     frame: false,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
     },
+  });
+  mainWindow.once("ready-to-show", () => {
+    mainWindow?.show();
   });
 
   if (process.env.NODE_ENV === "development") {
@@ -118,7 +122,10 @@ ipcMain.handle("logfiles:get", () => {
     const jsonName = dirPath;
     const jsonPath = path.resolve(dirPath, "modifier.json");
     if (!JsonManage.isDefined(jsonName))
-      JsonManage.init(jsonName, jsonPath, {});
+      JsonManage.init(jsonName, jsonPath, {
+        ver: version,
+        cols: {},
+      });
     const data: TlogfileMetadata = getModifier(JsonManage.get(jsonName)).cols[
       fileName
     ];
@@ -135,13 +142,17 @@ ipcMain.handle("logfiles:get", () => {
 
 ipcMain.handle("logfile:set", (_event, data: TlogfileMetadata) => {
   const dirPath = path.dirname(data.path);
-  const fileaName = path.basename(data.path);
+  const fileName = path.basename(data.path);
   const jsonName = dirPath;
   const jsonPath = path.resolve(dirPath, "modifier.json");
-  if (!JsonManage.isDefined(jsonName)) JsonManage.init(jsonName, jsonPath, {});
+  if (!JsonManage.isDefined(jsonName))
+    JsonManage.init(jsonName, jsonPath, {
+      ver: version,
+      cols: {},
+    } as TlogfileSetting);
   let modifierJson: TlogfileSetting = getModifier(JsonManage.get(jsonName));
-  modifierJson.cols[fileaName] = data;
-  JsonManage.update(jsonName, modifierJson);
+  modifierJson.cols[fileName] = data;
+  setModifier(jsonName, modifierJson);
 });
 
 ipcMain.handle("logdata:get", (_event, id: string) => {
@@ -153,17 +164,16 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
   if (!JsonManage.isDefined(dirPath))
     JsonManage.init(dirPath, jsonPath, {
       ver: version,
-      tabs: {},
       cols: {},
     } as TlogfileSetting);
   let modifierJson: TlogfileSetting = getModifier(JsonManage.get(dirPath));
   const res: TlogfileData = {
     metadata: {
-      name: modifierJson.cols?.[fileName].name || fileName,
+      name: modifierJson.cols?.[fileName]?.name || fileName,
       path: id,
-      date: modifierJson.cols?.[fileName].date || 0,
-      tag: modifierJson.cols?.[fileName].tag || [],
-      tabs: modifierJson.cols?.[fileName].tabs || {},
+      date: modifierJson.cols?.[fileName]?.date || 0,
+      tag: modifierJson.cols?.[fileName]?.tag || [],
+      tabs: modifierJson.cols?.[fileName]?.tabs || {},
     },
     colmuns: [],
   };
@@ -251,7 +261,6 @@ ipcMain.handle(
     if (!JsonManage.isDefined(dirPath))
       JsonManage.init(dirPath, jsonPath, {
         ver: version,
-        tabs: {},
         cols: {},
       } as TlogfileSetting);
     const json = getModifier(JsonManage.get(dirPath));
@@ -271,7 +280,7 @@ ipcMain.handle(
       };
     json.cols[fileName].tabs[data.name].tabtype = data.tabtype;
     if (data.color) json.cols[fileName].tabs[data.name].tabcolor = data.color;
-    JsonManage.update(dirPath, json);
+    setModifier(dirPath, json);
     return;
   }
 );
@@ -392,13 +401,18 @@ const getModifier = (data: any): TlogfileSetting => {
     cols: {},
   };
   let res = def;
-  if (!("ver" in data)) {
-    //v1.2.0以前
+  if (!data.ver) {
+    // v1.2.0以前
     res["cols"] = data;
+    // vx.x.x以前
     // } else if (!compareVersion(data["ver"], [9, 9, 9])) {
   } else {
     res = data;
   }
   res.ver = version;
   return res;
+};
+const setModifier = (name: string, data: TlogfileSetting): void => {
+  data.ver = version;
+  JsonManage.update(name, data);
 };
