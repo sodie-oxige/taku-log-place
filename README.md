@@ -2,7 +2,7 @@
 
 ![electron](https://img.shields.io/badge/-Electron-47848F.svg?logo=electron&style=popout&logoColor=white)
 ![node.js](https://img.shields.io/badge/-Next.js-000000.svg?logo=next.js&style=popout)
-![shadcn/ui](https://img.shields.io/badge/-shadcn\/ui-000000.svg?logo=shadcnui&style=popout)
+![shadcn/ui](https://img.shields.io/badge/-shadcn/ui-000000.svg?logo=shadcnui&style=popout)
 
 ## 概要
 
@@ -16,8 +16,8 @@ TRPG のセッションログなどの html ファイルを閲覧・管理する
 
 ## インストール
 
-releaseから最新版をダウンロードしてください。  
-ファイルはzip形式なので任意の場所で解凍し、中にある「卓ログ置き場.exe」を実行すれば使用できます。  
+release から最新版をダウンロードしてください。  
+ファイルは zip 形式なので任意の場所で解凍し、中にある「卓ログ置き場.exe」を実行すれば使用できます。
 
 ### アンインストール
 
@@ -29,7 +29,7 @@ releaseから最新版をダウンロードしてください。
 なにかあればこちらまで。  
 [![BlueSky](https://img.shields.io/badge/-bluesky-0285FF.svg?logo=bluesky&logoColor=white&style=popout)](https://bsky.app/profile/sodie-oxige.bsky.social)
 
-***
+---
 
 ## 機能
 
@@ -106,7 +106,7 @@ releaseから最新版をダウンロードしてください。
 ただし、あくまで補助的な機能です。デスクトップアプリの機能はほぼなく成形済みファイルが閲覧できるのみとなります。  
 ファイルは`Users\(username)\AppData\Roaming\卓ログ置き場\logfile`に「(ログ名).html」保存されます。同名のログは上書き保存されます。
 
-***
+---
 
 ## 今後の実装予定
 
@@ -115,6 +115,23 @@ releaseから最新版をダウンロードしてください。
 
 ## 更新履歴
 
+- **v1.3.1** (2025-03-19)
+  - ログ一覧画面
+    - ページネーションの改修
+      - 無駄な省略部分を削除し、ページ遷移をより便利に
+    - 検索動作の改修
+      - タグ検索時に空欄にしても全てのデータが表示されないのを修正
+    - UI 改善
+      - 監視ディレクトリ表示を改良
+  - ログ閲覧画面
+    - UI 改善
+      - ログ閲覧の文字サイズ調整
+      - カラーでのタブ名表示
+  - その他
+    - modifier.json 読み込み書き込み周りの修正
+      - modifier.json がない時の作成処理
+      - modifier.json のバージョンチェックミスの修正
+    - その他動作の安定化
 - **v1.3.0** (2025-03-19)
   - ログ一覧画面
     - タグ検索のリメイク
@@ -125,7 +142,7 @@ releaseから最新版をダウンロードしてください。
       - 選択できるタブ表示に背景色を自由に指定できる「カラー」を追加
   - ローカル保存
     - ログ閲覧画面をローカルにも保存する機能追加(スマホなどで見ることを想定)
-  - READMEの更新
+  - README の更新
     - バッジとか、連絡先とか
 - **v1.2.0** (2025-02-07)
   - ログ閲覧画面
