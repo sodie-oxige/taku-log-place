@@ -27,7 +27,7 @@ function defaultTabtype(tab: string): number {
 }
 
 let mainWindow: BrowserWindow | null;
-const version: [number, number, number] = process.env.npm_package_version
+const version: [number, number, number] = app.getVersion()
   ?.split(".")
   .map((n) => Number(n))
   .concat([0, 0, 0])
