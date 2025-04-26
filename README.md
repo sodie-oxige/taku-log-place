@@ -16,7 +16,7 @@ TRPG のセッションログなどの html ファイルを閲覧・管理する
 
 ## インストール
 
-release から最新版をダウンロードしてください。  
+release（[こちら](https://github.com/sodie-oxige/taku-log-place/releases)）から最新版をダウンロードしてください。  
 ファイルは zip 形式なので任意の場所で解凍し、中にある「卓ログ置き場.exe」を実行すれば使用できます。
 
 ### アンインストール
@@ -27,7 +27,8 @@ release から最新版をダウンロードしてください。
 ## リンク
 
 なにかあればこちらまで。  
-[![BlueSky](https://img.shields.io/badge/-bluesky-0285FF.svg?logo=bluesky&logoColor=white&style=popout)](https://bsky.app/profile/sodie-oxige.bsky.social)
+[![BlueSky](https://img.shields.io/badge/-@sodie--oxige.bsky.social-0285FF.svg?logo=bluesky&logoColor=white&style=popout)](https://bsky.app/profile/sodie-oxige.bsky.social)
+[![X(Twitter)](https://img.shields.io/badge/-@sodie__oxige-000000.svg?logo=X&style=popout)](https://x.com/sodie_oxige)
 
 ---
 
@@ -49,7 +50,7 @@ release から最新版をダウンロードしてください。
 
 - 名前を空白区切り・部分一致で検索
 - 日付を範囲指定で検索
-- タグを空白区切り完全一致（\*:ワイルドカード）で検索
+- タグを空白区切り完全一致（\*：ワイルドカード）で検索
 
 <p align="center">
     <img alt="検索機能-名前" src="./doc/image-search-name.png" width="266px">
@@ -118,7 +119,7 @@ release から最新版をダウンロードしてください。
 - **v1.3.2** (2025-04-26)
   - その他
     - modifier.json が読み込めない重大バグの修正
-      - versionの取得が開発環境でしかできない方法を使ってました。ビルドして動作を確認しなかった私の責任です。(´・ω・`)
+      - version の取得が開発環境でしかできない方法を使ってました。ビルドして動作を確認しなかった私の責任です。(´・ω・`)
 - **v1.3.1** (2025-04-26)
   - ログ一覧画面
     - ページネーションの改修
