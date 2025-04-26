@@ -394,7 +394,7 @@ const InfoStatement = ({
 }) => {
   return (
     <div
-      className="m-1 mx-16 flex flex-col px-2 border-x"
+      className="m-1 mx-auto flex flex-col px-2 min-w-[80%] w-[100vh] max-w-full border-x"
       style={
         {
           "--c": statement.color,

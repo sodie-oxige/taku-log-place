@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Header from "./header";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ClientLayout = ({
   children,
@@ -20,11 +19,11 @@ const ClientLayout = ({
   return (
     <body className="flex flex-col h-screen">
       <Header onTriggerReload={triggerReload} />
-      <ScrollArea className="flex-1 h-full">
+      <div className="flex-1 h-full overflow-y-auto scrollbar">
         <main className="container mx-auto px-4 w-[100dvw]" key={`main_${reloadKey}`}>
           {children}
         </main>
-      </ScrollArea>
+      </div>
     </body>
   );
 };
