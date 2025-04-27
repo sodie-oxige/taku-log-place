@@ -30,6 +30,7 @@ import { Label } from "@/components/ui/label";
 import { ChevronRight } from "lucide-react";
 import { ColorPicker } from "@/components/colorpicker";
 import { ColorUtils } from "@root/module/color_utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Tabtypes = ["その他", "メイン", "雑談", "情報", "カラー"];
 
@@ -221,14 +222,18 @@ const DetailPageComponent = () => {
             <ChevronRight />
           </Button>
         </SheetTrigger>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>タブ設定</SheetTitle>
-            {!!tabSetting &&
-              sortedTabs.map(([k, v]) => {
-                return <Tabselect name={k} value={v} key={`tabselect_${k}`} />;
-              })}
-          </SheetHeader>
+        <SheetContent className="p-0">
+          <ScrollArea className="h-full">
+            <SheetHeader className="p-6">
+              <SheetTitle>タブ設定</SheetTitle>
+              {!!tabSetting &&
+                sortedTabs.map(([k, v]) => {
+                  return (
+                    <Tabselect name={k} value={v} key={`tabselect_${k}`} />
+                  );
+                })}
+            </SheetHeader>
+          </ScrollArea>
         </SheetContent>
       </Sheet>
 
