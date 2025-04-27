@@ -14,7 +14,9 @@ interface ColorPickerProps {
 }
 
 const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
-  const [hsl, setHsl] = useState<ColorUtils.HSL>(value ?? { h: 0, s: 100, l: 50 });
+  const [hsl, setHsl] = useState<ColorUtils.HSL>(
+    value ?? { h: 0, s: 100, l: 50 }
+  );
   const isMouseDown = useRef(false);
 
   const ColorPickerContent = () => {
@@ -136,7 +138,7 @@ const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
   }
   const Cursor = ({ x, y, className, ...props }: CursorProps) => {
     const rx = Math.round(x * 100);
-    const ry = Math.round((y || 0.5) * 100);
+    const ry = Math.round((y ?? 0.5) * 100);
     return (
       <div
         className={cn("absolute top-0 left-0 flex w-full h-full", className)}
@@ -162,6 +164,9 @@ const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
         <Button
           variant="outline"
           className="flex h-9 w-9 items-center justify-center ring-offset-background data-[placeholder]:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+          style={{
+            background: `linear-gradient(to right in hsl, hsl(${hsl.h}, 0%, ${hsl.l}%), hsl(${hsl.h}, 100%, 50%))`,
+          }}
         >
           <div
             className="h-6 aspect-square rounded"
