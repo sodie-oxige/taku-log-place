@@ -3,10 +3,8 @@ import path from "path";
 import JsonManage from "./module/json_manager";
 import fs from "fs";
 import { Parser } from "htmlparser2";
+import defaultValues from "@/types/defaultValues";
 
-let defaultSetting: Tsetting = {
-  logdir: [],
-};
 function defaultTabtype(tab: string): number {
   switch (tab) {
     case "main":
@@ -60,7 +58,7 @@ app.on("ready", () => {
   });
 
   const settingPath = path.join(app.getPath("userData"), "setting.json");
-  JsonManage.init("setting", settingPath, defaultSetting);
+  JsonManage.init("setting", settingPath, defaultValues.defTsetting);
 });
 
 app.on("window-all-closed", () => {
@@ -148,8 +146,8 @@ ipcMain.handle("logfile:set", (_event, data: TlogfileMetadata) => {
   const jsonPath = path.resolve(dirPath, "modifier.json");
   if (!JsonManage.isDefined(jsonName))
     JsonManage.init(jsonName, jsonPath, {
+      ...defaultValues.defTlogfileSetting,
       ver: version,
-      cols: {},
     } as TlogfileSetting);
   let modifierJson: TlogfileSetting = getModifier(JsonManage.get(jsonName));
   modifierJson.cols[fileName] = data;
@@ -164,8 +162,8 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
   const jsonPath = path.resolve(dirPath, "modifier.json");
   if (!JsonManage.isDefined(dirPath))
     JsonManage.init(dirPath, jsonPath, {
+      ...defaultValues.defTlogfileSetting,
       ver: version,
-      cols: {},
     } as TlogfileSetting);
   let modifierJson: TlogfileSetting = getModifier(JsonManage.get(dirPath));
   const res: TlogfileData = {
@@ -178,20 +176,14 @@ ipcMain.handle("logdata:get", (_event, id: string) => {
     },
     colmuns: [],
   };
-  const defaultLogdata: TlogcolumnData = {
-    name: "",
-    tab: "",
-    content: "",
-    color: "",
-  };
-  let currentLogdata: TlogcolumnData = { ...defaultLogdata };
+  let currentLogdata: TlogcolumnData = { ...defaultValues.defTlogcolumnData };
   let isSpan = false;
   let spanIndex = 0;
 
   const parser = new Parser({
     onopentag(name, attr) {
       if (name === "p") {
-        currentLogdata = { ...defaultLogdata };
+        currentLogdata = { ...defaultValues.defTlogcolumnData };
         const color = attr.style.match(/#[0-9a-f]{6}/);
         if (color !== null) currentLogdata.color += color[0];
       } else if (name === "span") {
@@ -261,8 +253,8 @@ ipcMain.handle(
     if (!fileName) return;
     if (!JsonManage.isDefined(dirPath))
       JsonManage.init(dirPath, jsonPath, {
+        ...defaultValues.defTlogfileSetting,
         ver: version,
-        cols: {},
       } as TlogfileSetting);
     const json = getModifier(JsonManage.get(dirPath));
     if (!json.cols[fileName])
@@ -296,17 +288,15 @@ ipcMain.handle("bookmark:get", (_event, id: string): number => {
   if (!fileName) return 0;
   if (!JsonManage.isDefined(dirPath))
     JsonManage.init(dirPath, jsonPath, {
+      ...defaultValues.defTlogfileSetting,
       ver: version,
-      cols: {},
     } as TlogfileSetting);
   const json = getModifier(JsonManage.get(dirPath));
   if (!json.cols[fileName])
     json.cols[fileName] = {
+      ...defaultValues.defTlogfileMetadata,
       name: fileName,
       path: filepath,
-      date: 0,
-      tag: [],
-      tabs: {},
     };
   if (!json.cols[fileName].bookmark) json.cols[fileName].bookmark = 0;
   return json.cols[fileName].bookmark;
@@ -322,17 +312,15 @@ ipcMain.handle("bookmark:set", (_event, id: string, index: number): void => {
   if (!fileName) return;
   if (!JsonManage.isDefined(dirPath))
     JsonManage.init(dirPath, jsonPath, {
+      ...defaultValues.defTlogfileSetting,
       ver: version,
-      cols: {},
     } as TlogfileSetting);
   const json = getModifier(JsonManage.get(dirPath));
   if (!json.cols[fileName])
     json.cols[fileName] = {
+      ...defaultValues.defTlogfileMetadata,
       name: fileName,
       path: filepath,
-      date: 0,
-      tag: [],
-      tabs: {},
     };
   json.cols[fileName].bookmark = index;
   setModifier(dirPath, json);
@@ -450,11 +438,7 @@ const compareVersion = (
   return false;
 };
 const getModifier = (data: any): TlogfileSetting => {
-  const def: TlogfileSetting = {
-    ver: [0, 0, 0],
-    cols: {},
-  };
-  let res = def;
+  let res = defaultValues.defTlogfileSetting;
   if (!data.ver) {
     // v1.2.0以前
     res["cols"] = data;
