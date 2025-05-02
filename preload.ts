@@ -14,4 +14,7 @@ contextBridge.exposeInMainWorld("electron", {
   logdataGet: (id: string) => ipcRenderer.invoke("logdata:get", id),
   logdataSet: (id: string, data: TlogfileData) =>
     ipcRenderer.invoke("logdata:set", id, data),
+  bookmarkGet: (id: number) => ipcRenderer.invoke("bookmark:get", id),
+  bookmarkSet: (id: number, index: number) =>
+    ipcRenderer.invoke("bookmark:set", id, index),
 });

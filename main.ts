@@ -27,7 +27,8 @@ function defaultTabtype(tab: string): number {
 }
 
 let mainWindow: BrowserWindow | null;
-const version: [number, number, number] = app.getVersion()
+const version: [number, number, number] = app
+  .getVersion()
   ?.split(".")
   .map((n) => Number(n))
   .concat([0, 0, 0])
@@ -284,6 +285,59 @@ ipcMain.handle(
     return;
   }
 );
+
+ipcMain.handle("bookmark:get", (_event, id: string): number => {
+  const filepath = decodeURIComponent(id);
+  const _temp = filepath.split("\\");
+  const fileName = _temp.pop();
+  const dirPath = _temp.join("\\");
+  const jsonPath = path.resolve(dirPath, "modifier.json");
+
+  if (!fileName) return 0;
+  if (!JsonManage.isDefined(dirPath))
+    JsonManage.init(dirPath, jsonPath, {
+      ver: version,
+      cols: {},
+    } as TlogfileSetting);
+  const json = getModifier(JsonManage.get(dirPath));
+  if (!json.cols[fileName])
+    json.cols[fileName] = {
+      name: fileName,
+      path: filepath,
+      date: 0,
+      tag: [],
+      tabs: {},
+    };
+  if (!json.cols[fileName].bookmark) json.cols[fileName].bookmark = 0;
+  return json.cols[fileName].bookmark;
+});
+
+ipcMain.handle("bookmark:set", (_event, id: string, index: number): void => {
+  const filepath = decodeURIComponent(id);
+  const _temp = filepath.split("\\");
+  const fileName = _temp.pop();
+  const dirPath = _temp.join("\\");
+  const jsonPath = path.resolve(dirPath, "modifier.json");
+
+  if (!fileName) return;
+  if (!JsonManage.isDefined(dirPath))
+    JsonManage.init(dirPath, jsonPath, {
+      ver: version,
+      cols: {},
+    } as TlogfileSetting);
+  const json = getModifier(JsonManage.get(dirPath));
+  if (!json.cols[fileName])
+    json.cols[fileName] = {
+      name: fileName,
+      path: filepath,
+      date: 0,
+      tag: [],
+      tabs: {},
+    };
+  json.cols[fileName].bookmark = index;
+  setModifier(dirPath, json);
+  return;
+});
 
 ipcMain.handle("save-html", async (_event, name: string) => {
   setTimeout(async () => {

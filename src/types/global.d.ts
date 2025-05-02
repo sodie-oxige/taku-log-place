@@ -6,20 +6,23 @@ declare global {
       windowClose: () => void;
       windowMaximize: () => void;
       windowMinimize: () => void;
-      saveHtml: (string) => void;
+      saveHtml: (id: string) => void;
       // 監視ディレクトリ一覧操作
       logdirGet: () => string[];
       logdirAdd: () => Promise<string[]>;
-      logdirDelete: (string) => string[];
+      logdirDelete: (id: string) => string[];
       // ログファイル一覧操作
       logfilesGet: () => TlogfileMetadata[];
-      logfileSet: (TlogTableColumn) => void;
+      logfileSet: (data: TlogTableColumn) => void;
       // ログファイル操作
-      logdataGet: (string) => TlogfileData;
+      logdataGet: (id: string) => TlogfileData;
       logdataSet: (
-        string,
-        { name: string, tabtype: number, color: string }
+        id: string,
+        data: { name: string; tabtype: number; color: string }
       ) => void;
+      // ブックマーク操作
+      bookmarkGet: (id: string) => number[];
+      bookmarkSet: (id: string, index: number) => void;
     };
   }
 
@@ -47,6 +50,7 @@ declare global {
         tabcolor?: string;
       }
     >;
+    bookmark?: number;
   }
 
   // 閲覧ファイル読み込みデータ
