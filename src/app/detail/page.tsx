@@ -54,8 +54,9 @@ const DetailPageComponent = () => {
   const isLogdataLoaded = useRef(false); // logdataのロードが完了したかのフラグ
   const deffTabSetting = useRef<TlogfileData["metadata"]["tabs"]>({}); // tabSettingの変更箇所
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  const id = searchParams.get("id")??"";
   const pageName = useRef("");
+  const nowIndex = useRef(0);
 
   useEffect(() => {
     (async () => {
@@ -65,6 +66,14 @@ const DetailPageComponent = () => {
       isLogdataLoaded.current = true;
       pageName.current = res.metadata.name;
       window.electron.saveHtml(pageName.current);
+      document
+        .querySelector("*:has(>main)")
+        ?.addEventListener("scroll", onScroll);
+      const bookmark = await window.electron.bookmarkGet(id);
+      console.log(bookmark);
+      document.querySelector(`[data-statement-index="${bookmark}"]`)?.scrollIntoView({
+        behavior: "smooth",
+      });
     })();
   }, [searchParams]);
 
@@ -85,7 +94,7 @@ const DetailPageComponent = () => {
       const data = {
         name: name,
         tabtype: Number(index),
-        color: false,
+        color: "",
       };
       window.electron.logdataSet(id, data);
     };
@@ -135,23 +144,29 @@ const DetailPageComponent = () => {
     );
   };
 
-  const Statement = ({ statement }: { statement: TlogcolumnData }) => {
-    const props = {
+  const Statement = ({
+    statement,
+    ...props
+  }: {
+    statement: TlogcolumnData;
+  }) => {
+    const statementProps = {
       author: statement.name,
       content: statement.content,
       tab: statement.tab,
+      ...props,
     };
     if (statement.name == "system")
-      return <SystemStatement statement={statement} {...props} />;
+      return <SystemStatement statement={statement} {...statementProps} />;
     switch (tabSetting[statement.tab]?.tabtype) {
       case 0:
-        return <AnotherStatement statement={statement} {...props} />;
+        return <AnotherStatement statement={statement} {...statementProps} />;
       case 1:
-        return <MainStatement statement={statement} {...props} />;
+        return <MainStatement statement={statement} {...statementProps} />;
       case 2:
-        return <OtherStatement statement={statement} {...props} />;
+        return <OtherStatement statement={statement} {...statementProps} />;
       case 3:
-        return <InfoStatement statement={statement} {...props} />;
+        return <InfoStatement statement={statement} {...statementProps} />;
       case 4:
         return (
           <ColorStatement
@@ -190,6 +205,33 @@ const DetailPageComponent = () => {
       }
     }
   };
+
+  const onScroll = (_e: Event) => {
+    const currentStatementPos = getStatementPos(nowIndex.current);
+    const length = document.querySelectorAll(`[data-statement-index]`).length;
+    if (length <= 0) return;
+    const topStatementIndex =
+      currentStatementPos >= 0
+        ? findTopStatement(0, length - 1)
+        : findTopStatement(currentStatementPos, length - 1);
+    console.log(topStatementIndex);
+    window.electron.bookmarkSet(id, topStatementIndex);
+  };
+  const getStatementPos = (index: number): number => {
+    const rect = document
+      .querySelector(`[data-statement-index="${index}"]`)
+      ?.getBoundingClientRect();
+    if (!rect) return -2;
+    return rect.top < 0 ? -1 : rect.top > window.innerHeight ? 1 : 0;
+  };
+  const findTopStatement = (min: number, max: number): number => {
+    if (min == max) return min;
+    const mid = Math.floor((min + max) / 2);
+    const pos = getStatementPos(mid);
+    if (pos >= 0) return findTopStatement(min, mid);
+    else return findTopStatement(mid + 1, max);
+  };
+
   const sortedTabs = useMemo(
     () =>
       Object.entries(tabSetting).sort(([ak, _av], [bk, _bv]) => {
@@ -249,7 +291,7 @@ const DetailPageComponent = () => {
           ))
         : colSetting.map((l, i) => (
             <Fragment key={i}>
-              <Statement statement={l} />
+              <Statement statement={l} data-statement-index={i} />
               <Separator />
             </Fragment>
           ))}
