@@ -31,6 +31,7 @@ import { ChevronRight } from "lucide-react";
 import { ColorPicker } from "@/components/colorpicker";
 import { ColorUtils } from "@root/module/color_utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 const Tabtypes = ["その他", "メイン", "雑談", "情報", "カラー"];
 
@@ -54,7 +55,7 @@ const DetailPageComponent = () => {
   const isLogdataLoaded = useRef(false); // logdataのロードが完了したかのフラグ
   const deffTabSetting = useRef<TlogfileData["metadata"]["tabs"]>({}); // tabSettingの変更箇所
   const searchParams = useSearchParams();
-  const id = searchParams.get("id")??"";
+  const id = searchParams.get("id") ?? "";
   const pageName = useRef("");
   const nowIndex = useRef(0);
 
@@ -70,10 +71,11 @@ const DetailPageComponent = () => {
         .querySelector("*:has(>main)")
         ?.addEventListener("scroll", onScroll);
       const bookmark = await window.electron.bookmarkGet(id);
-      console.log(bookmark);
-      document.querySelector(`[data-statement-index="${bookmark}"]`)?.scrollIntoView({
-        behavior: "smooth",
-      });
+      document
+        .querySelector(`[data-statement-index="${bookmark}"]`)
+        ?.scrollIntoView({
+          behavior: "smooth",
+        });
     })();
   }, [searchParams]);
 
@@ -149,7 +151,7 @@ const DetailPageComponent = () => {
     ...props
   }: {
     statement: TlogcolumnData;
-  }) => {
+  } & React.HTMLAttributes<HTMLDivElement>) => {
     const statementProps = {
       author: statement.name,
       content: statement.content,
@@ -214,7 +216,6 @@ const DetailPageComponent = () => {
       currentStatementPos >= 0
         ? findTopStatement(0, length - 1)
         : findTopStatement(currentStatementPos, length - 1);
-    console.log(topStatementIndex);
     window.electron.bookmarkSet(id, topStatementIndex);
   };
   const getStatementPos = (index: number): number => {
@@ -291,7 +292,11 @@ const DetailPageComponent = () => {
           ))
         : colSetting.map((l, i) => (
             <Fragment key={i}>
-              <Statement statement={l} data-statement-index={i} />
+              <Statement
+                statement={l}
+                data-index={i}
+                className="statement"
+              />
               <Separator />
             </Fragment>
           ))}
@@ -301,13 +306,14 @@ const DetailPageComponent = () => {
 
 const MainStatement = ({
   statement,
+  className,
   ...props
 }: {
   statement: TlogcolumnData;
-}) => {
+} & React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
-      className="flex flex-col p-2.5"
+      className={cn("flex flex-col p-2.5", className)}
       style={
         {
           "--c": statement.color,
@@ -332,13 +338,14 @@ const MainStatement = ({
 
 const OtherStatement = ({
   statement,
+  className,
   ...props
 }: {
   statement: TlogcolumnData;
-}) => {
+} & React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
-      className="ml-6 flex flex-col p-2.5 text-[var(--c)]"
+      className={cn("ml-6 flex flex-col p-2.5 text-[var(--c)]", className)}
       style={
         {
           "--c": statement.color,
@@ -361,15 +368,16 @@ const OtherStatement = ({
 
 const ColorStatement = ({
   statement,
+  className,
   bg,
   ...props
 }: {
   statement: TlogcolumnData;
   bg: string;
-}) => {
+} & React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
-      className="ml-6 flex flex-col p-2.5 text-[var(--c)]"
+      className={cn("ml-6 flex flex-col p-2.5 text-[var(--c)]", className)}
       style={
         {
           "--c": statement.color,
@@ -395,10 +403,11 @@ const ColorStatement = ({
 
 const SystemStatement = ({
   statement,
+  className,
   ...props
 }: {
   statement: TlogcolumnData;
-}) => {
+} & React.HTMLAttributes<HTMLDivElement>) => {
   const temp: string[] = statement.content
     .split(/[\[\]\:→]/)
     .map((v) => v.trim())
@@ -410,7 +419,10 @@ const SystemStatement = ({
     after: temp[3],
   };
   return (
-    <div className="flex flex-col items-center p-2.5" {...props}>
+    <div
+      className={cn("flex flex-col items-center p-2.5", className)}
+      {...props}
+    >
       <p className="relative text-xs font-bold">
         <span className="absolute mr-2 right-[50%] whitespace-nowrap">
           {data.name}
@@ -435,13 +447,17 @@ const SystemStatement = ({
 
 const InfoStatement = ({
   statement,
+  className,
   ...props
 }: {
   statement: TlogcolumnData;
-}) => {
+} & React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
-      className="m-1 mx-auto flex flex-col px-2 min-w-[80%] w-[100vh] max-w-full border-x"
+      className={cn(
+        "m-1 mx-auto flex flex-col px-2 min-w-[80%] w-[100vh] max-w-full border-x",
+        className
+      )}
       style={
         {
           "--c": statement.color,
@@ -466,13 +482,14 @@ const InfoStatement = ({
 
 const AnotherStatement = ({
   statement,
+  className,
   ...props
 }: {
   statement: TlogcolumnData;
-}) => {
+} & React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
-      className="ml-6 flex flex-col p-2.5"
+      className={cn("ml-6 flex flex-col p-2.5", className)}
       style={
         {
           "--c": statement.color,

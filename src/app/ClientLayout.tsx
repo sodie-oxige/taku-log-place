@@ -11,7 +11,6 @@ const ClientLayout = ({
   const pathname = usePathname();
   const triggerReload = () => {
     if (pathname == "/") {
-      console.log(pathname);
       setReloadKey((prev) => prev + 1);
     }
   };
