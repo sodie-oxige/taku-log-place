@@ -76,6 +76,14 @@ const DetailPageComponent = () => {
         ?.scrollIntoView({
           behavior: "smooth",
         });
+
+      const scripts = await window.pluginAPI.loadPluginScripts();
+      console.log(scripts);
+      scripts.forEach((scriptText) => {
+        const script = document.createElement("script");
+        script.textContent = scriptText;
+        document.body.appendChild(script);
+      });
     })();
   }, [searchParams]);
 
@@ -292,11 +300,7 @@ const DetailPageComponent = () => {
           ))
         : colSetting.map((l, i) => (
             <Fragment key={i}>
-              <Statement
-                statement={l}
-                data-index={i}
-                className="statement"
-              />
+              <Statement statement={l} data-index={i} className="statement" />
               <Separator />
             </Fragment>
           ))}

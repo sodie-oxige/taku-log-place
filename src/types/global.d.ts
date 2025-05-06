@@ -24,6 +24,9 @@ declare global {
       bookmarkGet: (id: string) => number[];
       bookmarkSet: (id: string, index: number) => void;
     };
+    pluginAPI: {
+      loadPluginScripts: () => Promise<string[]>;
+    };
   }
 
   // アプリ全体の設定
