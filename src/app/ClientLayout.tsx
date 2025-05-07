@@ -18,11 +18,11 @@ const ClientLayout = ({
   return (
     <body className="flex flex-col h-screen">
       <Header onTriggerReload={triggerReload} />
-      <div className="flex-1 h-full overflow-y-auto scrollbar">
-        <main className="container mx-auto px-4 w-[100dvw]" key={`main_${reloadKey}`}>
+      <main className="flex-1 h-full overflow-y-auto scrollbar">
+        <div className="container mx-auto px-4 w-[100dvw]" key={`main_${reloadKey}`}>
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </body>
   );
 };

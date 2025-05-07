@@ -340,7 +340,7 @@ ipcMain.handle("pluginScripts:get", async (_event) => {
     .filter((file) => file.endsWith(".js"))
     .map((file) => {
       const fullPath = path.join(pluginDir, file);
-      return fs.readFileSync(fullPath, "utf8");
+      return { name: fullPath, data: fs.readFileSync(fullPath, "utf8") };
     });
 });
 

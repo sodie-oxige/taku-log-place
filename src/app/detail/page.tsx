@@ -58,6 +58,7 @@ const DetailPageComponent = () => {
   const id = searchParams.get("id") ?? "";
   const pageName = useRef("");
   const nowIndex = useRef(0);
+  const loadedPlugins = useRef<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -67,22 +68,25 @@ const DetailPageComponent = () => {
       isLogdataLoaded.current = true;
       pageName.current = res.metadata.name;
       window.electron.saveHtml(pageName.current);
-      document
-        .querySelector("*:has(>main)")
-        ?.addEventListener("scroll", onScroll);
-      const bookmark = await window.electron.bookmarkGet(id);
-      document
-        .querySelector(`[data-statement-index="${bookmark}"]`)
-        ?.scrollIntoView({
-          behavior: "smooth",
-        });
 
-      const scripts = await window.pluginAPI.loadPluginScripts();
-      console.log(scripts);
-      scripts.forEach((scriptText) => {
-        const script = document.createElement("script");
-        script.textContent = scriptText;
-        document.body.appendChild(script);
+      document.querySelector("main")?.addEventListener("scroll", onScroll);
+      const bookmark = await window.electron.bookmarkGet(id);
+      document.querySelector(`[data-index="${bookmark}"]`)?.scrollIntoView({
+        behavior: "smooth",
+      });
+
+      requestAnimationFrame(async () => {
+        window.dom = {
+          main: document.querySelector("main"),
+        };
+        const scripts = await window.pluginAPI.loadPluginScripts();
+        scripts.forEach((scriptData) => {
+          if (loadedPlugins.current.includes(scriptData.name)) return;
+          const script = document.createElement("script");
+          script.textContent = scriptData.data;
+          document.body.appendChild(script);
+          loadedPlugins.current.push(scriptData.name);
+        });
       });
     })();
   }, [searchParams]);
