@@ -2,6 +2,10 @@ export {};
 
 declare global {
   interface Window {
+    dom: {
+      main: ReactNode;
+    };
+    
     electron: {
       windowClose: () => void;
       windowMaximize: () => void;
@@ -23,6 +27,9 @@ declare global {
       // ブックマーク操作
       bookmarkGet: (id: string) => number[];
       bookmarkSet: (id: string, index: number) => void;
+    };
+    pluginAPI: {
+      loadPluginScripts: () => Promise<{ name: string; data: string }[]>;
     };
   }
 

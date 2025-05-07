@@ -3,7 +3,7 @@ import path from "path";
 import JsonManage from "./module/json_manager";
 import fs from "fs";
 import { Parser } from "htmlparser2";
-import defaultValues from "@/types/defaultValues";
+import defaultValues from "./src/types/defaultValues";
 
 function defaultTabtype(tab: string): number {
   switch (tab) {
@@ -59,6 +59,10 @@ app.on("ready", () => {
 
   const settingPath = path.join(app.getPath("userData"), "setting.json");
   JsonManage.init("setting", settingPath, defaultValues.defTsetting);
+
+  const pluginDir = path.join(app.getPath("userData"), "plugins");
+  console.log(fs.existsSync(pluginDir));
+  if (!fs.existsSync(pluginDir)) fs.mkdirSync(pluginDir);
 });
 
 app.on("window-all-closed", () => {
@@ -325,6 +329,19 @@ ipcMain.handle("bookmark:set", (_event, id: string, index: number): void => {
   json.cols[fileName].bookmark = index;
   setModifier(dirPath, json);
   return;
+});
+
+ipcMain.handle("pluginScripts:get", async (_event) => {
+  const pluginDir = path.join(app.getPath("userData"), "plugins");
+  if (!fs.existsSync(pluginDir)) return [];
+
+  return fs
+    .readdirSync(pluginDir)
+    .filter((file) => file.endsWith(".js"))
+    .map((file) => {
+      const fullPath = path.join(pluginDir, file);
+      return { name: fullPath, data: fs.readFileSync(fullPath, "utf8") };
+    });
 });
 
 ipcMain.handle("save-html", async (_event, name: string) => {

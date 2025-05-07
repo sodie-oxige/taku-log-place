@@ -18,3 +18,7 @@ contextBridge.exposeInMainWorld("electron", {
   bookmarkSet: (id: number, index: number) =>
     ipcRenderer.invoke("bookmark:set", id, index),
 });
+
+contextBridge.exposeInMainWorld("pluginAPI", {
+  loadPluginScripts: async() => ipcRenderer.invoke("pluginScripts:get"),
+});
