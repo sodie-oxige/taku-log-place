@@ -69,7 +69,7 @@ const DetailPageComponent = () => {
       pageName.current = res.metadata.name;
       window.electron.saveHtml(pageName.current);
 
-      document.querySelector("main")?.addEventListener("scroll", onScroll);
+      document.querySelector("main")?.addEventListener("scrollend", onScroll);
       const bookmark = await window.electron.bookmarkGet(id);
       document.querySelector(`[data-index="${bookmark}"]`)?.scrollIntoView({
         behavior: "smooth",
@@ -186,7 +186,7 @@ const DetailPageComponent = () => {
           <ColorStatement
             statement={statement}
             bg={tabSetting[statement.tab]?.tabcolor ?? "#fff3f3"}
-            {...props}
+            {...statementProps}
           />
         );
       default:
@@ -222,7 +222,7 @@ const DetailPageComponent = () => {
 
   const onScroll = (_e: Event) => {
     const currentStatementPos = getStatementPos(nowIndex.current);
-    const length = document.querySelectorAll(`[data-statement-index]`).length;
+    const length = document.querySelectorAll(`[data-index]`).length;
     if (length <= 0) return;
     const topStatementIndex =
       currentStatementPos >= 0
@@ -232,7 +232,7 @@ const DetailPageComponent = () => {
   };
   const getStatementPos = (index: number): number => {
     const rect = document
-      .querySelector(`[data-statement-index="${index}"]`)
+      .querySelector(`[data-index="${index}"]`)
       ?.getBoundingClientRect();
     if (!rect) return -2;
     return rect.top < 0 ? -1 : rect.top > window.innerHeight ? 1 : 0;
