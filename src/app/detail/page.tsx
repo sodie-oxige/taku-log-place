@@ -83,7 +83,7 @@ const DetailPageComponent = () => {
         scripts.forEach((scriptData) => {
           if (loadedPlugins.current.includes(scriptData.name)) return;
           const script = document.createElement("script");
-          script.textContent = scriptData.data;
+          script.textContent = `(()=>{ ${scriptData.data} })();`;
           document.body.appendChild(script);
           loadedPlugins.current.push(scriptData.name);
         });
